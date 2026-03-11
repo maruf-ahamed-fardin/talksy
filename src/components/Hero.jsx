@@ -240,12 +240,6 @@ function Hero() {
           </form>
 
           <div className="hero-actions">
-            <Link className="text-link" to="/features">
-              Explore platform
-            </Link>
-            <Link className="text-link" to="/pricing">
-              See pricing
-            </Link>
             <Link className="hero-shortcut" to="/history">
               <span aria-hidden="true" className="hero-shortcut__icon">
                 <svg fill="none" viewBox="0 0 24 24">
@@ -254,6 +248,12 @@ function Hero() {
                 </svg>
               </span>
               <span>History</span>
+            </Link>
+            <Link className="text-link" to="/features">
+              Explore platform
+            </Link>
+            <Link className="text-link" to="/pricing">
+              See pricing
             </Link>
           </div>
         </div>
