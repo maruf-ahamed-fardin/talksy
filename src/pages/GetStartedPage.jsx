@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 
 const steps = [
-  'Pick the room style that fits your call rhythm',
-  'Invite collaborators or participants with one link',
-  'Launch your first meeting and capture action items immediately',
+  'Choose Create or Join and decide whether you need a fresh room code or an existing one',
+  'Share the link, set your display name, and test the live room on desktop or mobile',
+  'Use fullscreen when presenting, then revisit history to reopen rooms and keep the workflow moving',
 ];
 
 function GetStartedPage() {
@@ -11,10 +11,11 @@ function GetStartedPage() {
     <section className="page-shell">
       <div className="page-hero">
         <span className="eyebrow">Get started</span>
-        <h1>Set up your first Talksy workflow in a few clean steps.</h1>
+        <h1>Go from first test room to repeatable Talksy workflow in minutes.</h1>
         <p>
-          The platform is designed to feel familiar quickly. Start with one room,
-          test your call flow, and expand only when you need more structure.
+          Talksy is built to feel obvious on the first try. Start with one room, learn
+          the live flow, then layer in history, support, and install shortcuts as your
+          routine grows.
         </p>
       </div>
 
@@ -31,9 +32,10 @@ function GetStartedPage() {
 
         <article className="detail-card">
           <span className="card-label">Need direction?</span>
-          <h3>Recommended path</h3>
+          <h3>Fastest path into the product</h3>
           <p className="get-started-note">
-            Start with a demo room, review the feature overview, then choose a plan only when you know your workflow.
+            Open the demo room, test the join flow on both desktop and mobile, then
+            review features and pricing once the experience feels right.
           </p>
           <div className="stacked-actions">
             <Link className="inline-button" to="/video/demo-room">

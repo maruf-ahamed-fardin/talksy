@@ -198,7 +198,7 @@ function DraggableFloat({ className, children, dragHandleSelector = null }) {
       onDragStart={(event) => event.preventDefault()}
       onLostPointerCapture={handleLostPointerCapture}
       onPointerCancel={handlePointerUp}
-      onPointerDown={handlePointerDown}
+        onPointerDownCapture={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onTransitionEnd={(event) => {

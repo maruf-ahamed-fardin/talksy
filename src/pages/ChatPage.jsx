@@ -3,16 +3,17 @@ import { Link } from 'react-router-dom';
 import { buildSupportReply } from '../data/supportKnowledge';
 
 const quickPrompts = [
-  'How do I start a team room?',
+  'How do I create and share a room?',
+  'Where can I see previous room history?',
   'What is included in the Team plan?',
-  'Can people join without sign-up?',
+  'Can guests join without sign-up?',
 ];
 
 const initialMessages = [
   {
     id: 1,
     author: 'Support AI',
-    body: 'Hi. I am the Talksy support assistant. Ask about rooms, pricing, features, onboarding, or use cases.',
+    body: 'Hi. I am the Talksy support assistant. Ask about live rooms, sharing links, room history, pricing, onboarding, install help, or which plan fits your workflow.',
     role: 'assistant',
     actions: [
       { label: 'Review pricing', to: '/pricing' },
@@ -79,10 +80,10 @@ function ChatPage() {
     <section className="page-shell chat-page">
       <div className="page-hero">
         <span className="eyebrow">Support</span>
-        <h1>Get instant support before you open a room.</h1>
+        <h1>Get fast product answers before your next room goes live.</h1>
         <p>
-          Ask the Talksy support assistant about pricing, setup, joining flow, features,
-          and which option fits your workflow.
+          Ask the Talksy support assistant about rooms, sharing flow, pricing, history,
+          onboarding, install help, and which Talksy path fits your team best.
         </p>
       </div>
 
@@ -90,12 +91,12 @@ function ChatPage() {
         <section className="chat-panel">
           <div className="chat-panel__header">
             <div>
-              <span className="card-label">AI support</span>
-              <h3>Support assistant</h3>
+              <span className="card-label">Product support</span>
+              <h3>Talksy assistant</h3>
             </div>
             <span className="chat-status">
               <span className="chat-status__dot" />
-              Online
+              Online now
             </span>
           </div>
 
@@ -168,13 +169,16 @@ function ChatPage() {
 
           <article className="detail-card">
             <span className="card-label">Need a next step?</span>
-            <p>Open a demo room, compare plans, or review features while the assistant helps visitors choose.</p>
+            <p>
+              Open a demo room, review features, or compare plans while the assistant
+              helps you map the right Talksy setup.
+            </p>
             <div className="stacked-actions">
               <Link className="inline-button" to="/video/demo-room">
                 Open demo room
               </Link>
-              <Link className="inline-button inline-button--secondary" to="/pricing">
-                Review pricing
+              <Link className="inline-button inline-button--secondary" to="/features">
+                Explore features
               </Link>
             </div>
           </article>

@@ -2,28 +2,28 @@ import { Link } from 'react-router-dom';
 
 const solutions = [
   {
-    title: 'Remote teams',
+    title: 'Product teams and startups',
     description:
-      'Daily stand-ups, stakeholder check-ins, and design reviews move faster with focused rooms and reliable join links.',
-    meta: 'Best for product, engineering, and operations',
+      'Run stand-ups, sprint reviews, design critiques, and stakeholder check-ins with room links that are fast to share and easy to reopen.',
+    meta: 'Best for product, engineering, operations, and founders',
   },
   {
-    title: 'Coaches and consultants',
+    title: 'Agencies and client services',
     description:
-      'Run sessions with clients, share a room instantly, and keep every conversation professional without technical overhead.',
-    meta: 'Best for solo operators and service teams',
+      'Send one room link to clients, jump into fullscreen when presenting, and keep recurring reviews tidy with reusable room habits.',
+    meta: 'Best for account teams, consultants, and delivery calls',
   },
   {
     title: 'Educators and mentors',
     description:
-      'Teach live, support office hours, and create smaller discussion rooms that students can join without confusion.',
-    meta: 'Best for live classes and training sessions',
+      'Teach live classes, host office hours, or run mentoring sessions with a join flow that stays simple for students on phones and laptops.',
+    meta: 'Best for tutoring, cohort sessions, and training programs',
   },
   {
-    title: 'Communities and events',
+    title: 'Communities and internal operations',
     description:
-      'Host virtual meetups, breakout sessions, and member calls in a simple environment that feels easy to enter.',
-    meta: 'Best for networks, clubs, and member spaces',
+      'Host meetups, volunteer check-ins, member calls, and internal huddles in a lightweight setup that keeps attention on the discussion.',
+    meta: 'Best for clubs, member spaces, support teams, and event ops',
   },
 ];
 
@@ -32,10 +32,11 @@ function SolutionsPage() {
     <section className="page-shell">
       <div className="page-hero">
         <span className="eyebrow">Solutions</span>
-        <h1>Built for the people who need conversations to stay simple and effective.</h1>
+        <h1>Talksy works best anywhere speed, clarity, and low-friction joining matter.</h1>
         <p>
-          Whether you are coordinating a small team or hosting a large workshop, Talksy
-          keeps the joining experience clear and the meeting flow under control.
+          Whether your calls are internal, client-facing, educational, or community-led,
+          Talksy gives hosts one clean workflow for launching rooms, sharing links, and
+          keeping the live experience polished.
         </p>
       </div>
 
@@ -52,14 +53,18 @@ function SolutionsPage() {
 
       <div className="page-cta">
         <div>
-          <span className="card-label">Need a custom workflow?</span>
+          <span className="card-label">Need the cleanest rollout?</span>
           <p>
-            Mix meeting templates, pricing tiers, and onboarding guidance to match the way your group already works.
+            Start in a demo room, test the flow on mobile and desktop, then use support
+            and pricing to shape the right Talksy setup for your group.
           </p>
         </div>
         <div className="stacked-actions">
-          <Link className="inline-button" to="/get-started">
-            Talk to us
+          <Link className="inline-button" to="/video/demo-room">
+            Try demo room
+          </Link>
+          <Link className="inline-button inline-button--secondary" to="/support">
+            Open support
           </Link>
           <Link className="inline-button inline-button--secondary" to="/pricing">
             Review plans

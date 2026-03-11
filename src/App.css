@@ -829,6 +829,11 @@
   touch-action: none;
 }
 
+.hero-float[data-drag-scope='full'] .hero-float__item {
+  cursor: grab;
+  touch-action: none;
+}
+
 .hero-float__item {
   position: relative;
   animation: heroFloat var(--float-duration, 7.8s) ease-in-out infinite;
@@ -847,6 +852,10 @@
 }
 
 .hero-float[data-drag-scope='full'].is-dragging {
+  cursor: grabbing;
+}
+
+.hero-float[data-drag-scope='full'].is-dragging .hero-float__item {
   cursor: grabbing;
 }
 
@@ -2274,6 +2283,11 @@
   background: linear-gradient(180deg, rgba(47, 99, 245, 0.08), rgba(255, 255, 255, 0.96));
 }
 
+.price-card {
+  display: flex;
+  flex-direction: column;
+}
+
 .price-amount {
   color: var(--text);
   font-size: 2.5rem;
@@ -2285,6 +2299,11 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--muted);
+}
+
+.price-card__action {
+  width: 100%;
+  margin-top: auto;
 }
 
 .page-cta {
@@ -2814,6 +2833,17 @@ body.room-fullscreen-active {
   border: 1px dashed rgba(15, 23, 42, 0.14);
   border-radius: 22px;
   background: rgba(244, 247, 252, 0.8);
+}
+
+.room-fallback p {
+  margin: 0;
+  color: rgba(15, 23, 42, 0.74);
+  line-height: 1.6;
+}
+
+.room-fallback code {
+  font-family: inherit;
+  font-weight: 700;
 }
 
 .room-fallback__code {

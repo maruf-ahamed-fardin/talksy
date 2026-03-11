@@ -3,8 +3,8 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { addCallHistoryEntry } from '../data/callHistory';
 
-const ZEGO_APP_ID = Number.parseInt(import.meta.env.VITE_ZEGO_APP_ID ?? '', 10);
-const ZEGO_SERVER_SECRET = import.meta.env.VITE_ZEGO_SERVER_SECRET ?? '';
+const DEV_ZEGO_APP_ID = Number.parseInt(import.meta.env.VITE_ZEGO_APP_ID ?? '', 10);
+const DEV_ZEGO_SERVER_SECRET = import.meta.env.VITE_ZEGO_SERVER_SECRET ?? '';
 const DISPLAY_NAME_STORAGE_KEY = 'talksy.display-name';
 
 const checklist = [
@@ -47,14 +47,22 @@ function VideoCompo() {
   const [hasLeftRoom, setHasLeftRoom] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [joinSession, setJoinSession] = useState(0);
+  const [kitToken, setKitToken] = useState('');
+  const [tokenError, setTokenError] = useState('');
+  const [isPreparingRoom, setIsPreparingRoom] = useState(false);
   const roomScreenRef = useRef(null);
   const meetingContainerRef = useRef(null);
   const suppressLeaveEventRef = useRef(false);
   const queryRoomId = new URLSearchParams(location.search).get('roomID');
   const activeRoom = normalizeRoomId(roomId || queryRoomId);
   const roomUrl = `${window.location.origin}/video/${encodeURIComponent(activeRoom)}`;
-  const hasZegoConfig = ZEGO_APP_ID > 0 && ZEGO_SERVER_SECRET.length > 0;
+  const canUseLocalDevToken = import.meta.env.DEV && DEV_ZEGO_APP_ID > 0 && DEV_ZEGO_SERVER_SECRET.length > 0;
   const shouldShowNamePrompt = !hasJoinedRoom && !hasLeftRoom;
+  const roomFallbackSnippet = import.meta.env.DEV
+    ? `VITE_ZEGO_APP_ID=your_app_id
+VITE_ZEGO_SERVER_SECRET=your_server_secret`
+    : `ZEGO_APP_ID=your_app_id
+ZEGO_SERVER_SECRET=your_server_secret`;
 
   const showLeaveState = () => {
     setIsFullscreen(false);
@@ -68,10 +76,13 @@ function VideoCompo() {
     setDisplayName('');
     setCopyStatus('Copy invite link');
     setJoinSession(0);
+    setKitToken('');
+    setTokenError('');
+    setIsPreparingRoom(false);
   }, [activeRoom]);
 
   useEffect(() => {
-    if (!hasJoinedRoom || hasLeftRoom || !displayName) {
+    if (!hasJoinedRoom || hasLeftRoom || !displayName || !kitToken) {
       return;
     }
 
@@ -91,7 +102,88 @@ function VideoCompo() {
       checklist,
       resolution: 'ZegoCloud adaptive',
     });
-  }, [activeRoom, displayName, hasJoinedRoom, hasLeftRoom]);
+  }, [activeRoom, displayName, hasJoinedRoom, hasLeftRoom, kitToken]);
+
+  useEffect(() => {
+    if (!hasJoinedRoom || hasLeftRoom || !displayName) {
+      setKitToken('');
+      setTokenError('');
+      setIsPreparingRoom(false);
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+    let cancelled = false;
+
+    const prepareRoom = async () => {
+      setKitToken('');
+      setTokenError('');
+      setIsPreparingRoom(true);
+
+      try {
+        const response = await fetch('/api/zego-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            roomId: activeRoom,
+            userId: userID,
+            userName: displayName,
+          }),
+          signal: abortController.signal,
+        });
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(payload.error || 'Unable to prepare the live room token.');
+        }
+
+        if (!payload.kitToken) {
+          throw new Error('The token service returned an empty room token.');
+        }
+
+        if (!cancelled) {
+          setKitToken(payload.kitToken);
+        }
+      } catch (error) {
+        if (abortController.signal.aborted || cancelled) {
+          return;
+        }
+
+        if (canUseLocalDevToken) {
+          const localKitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
+            DEV_ZEGO_APP_ID,
+            DEV_ZEGO_SERVER_SECRET,
+            activeRoom,
+            userID,
+            displayName,
+          );
+
+          setKitToken(localKitToken);
+          setTokenError('');
+          return;
+        }
+
+        setTokenError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to prepare the live room token.',
+        );
+      } finally {
+        if (!cancelled) {
+          setIsPreparingRoom(false);
+        }
+      }
+    };
+
+    prepareRoom();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [activeRoom, canUseLocalDevToken, displayName, hasJoinedRoom, hasLeftRoom, joinSession, userID]);
 
   useEffect(() => {
     if (!isFullscreen) {
@@ -107,22 +199,13 @@ function VideoCompo() {
   }, [isFullscreen]);
 
   useEffect(() => {
-    if (!hasZegoConfig || !meetingContainerRef.current || hasLeftRoom || !hasJoinedRoom || !displayName) {
+    if (!kitToken || !meetingContainerRef.current || hasLeftRoom || !hasJoinedRoom || !displayName) {
       return undefined;
     }
 
     const container = meetingContainerRef.current;
     let leftRoom = false;
     suppressLeaveEventRef.current = false;
-
-    // This test token flow is fine for local development. Production should generate tokens server-side.
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      ZEGO_APP_ID,
-      ZEGO_SERVER_SECRET,
-      activeRoom,
-      userID,
-      displayName,
-    );
 
     const zp = ZegoUIKitPrebuilt.create(kitToken);
 
@@ -170,7 +253,7 @@ function VideoCompo() {
         container.innerHTML = '';
       }
     };
-  }, [activeRoom, displayName, hasJoinedRoom, hasLeftRoom, hasZegoConfig, joinSession, roomUrl, userID]);
+  }, [displayName, hasJoinedRoom, hasLeftRoom, joinSession, kitToken, roomUrl]);
 
   const handleCopyLink = async () => {
     try {
@@ -249,17 +332,26 @@ function VideoCompo() {
                 </div>
               </div>
             </div>
-          ) : hasJoinedRoom && hasZegoConfig ? (
+          ) : hasJoinedRoom && kitToken ? (
             <div className="room-stage">
               <div className="zego-room-container" key={joinSession} ref={meetingContainerRef} />
             </div>
+          ) : hasJoinedRoom && isPreparingRoom ? (
+            <div className="room-standby">
+              <span className="card-label">Connecting</span>
+              <h2>Preparing your live room</h2>
+              <p>Generating a secure session token and loading the meeting controls.</p>
+            </div>
           ) : hasJoinedRoom ? (
             <div className="room-fallback">
-              <span className="card-label">Missing credentials</span>
-              <h3>Add your Zego credentials to `.env.local`</h3>
+              <span className="card-label">Secure setup required</span>
+              <h3>{tokenError || 'The live room could not get a secure ZEGO token.'}</h3>
+              <p>
+                For local Vite development use <code>.env.local</code>. For Vercel or any
+                deployed environment, add the server variables below and redeploy.
+              </p>
               <pre className="room-fallback__code">
-                {`VITE_ZEGO_APP_ID=your_app_id
-VITE_ZEGO_SERVER_SECRET=your_server_secret`}
+                {roomFallbackSnippet}
               </pre>
             </div>
           ) : (

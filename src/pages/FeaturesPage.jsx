@@ -1,39 +1,57 @@
 const features = [
   {
-    icon: 'HD',
-    title: 'Crystal-clear rooms',
+    icon: 'LIVE',
+    title: 'Instant live rooms',
     description:
-      'Launch instant video rooms with stable audio, clean layouts, and a fast join flow that keeps drop-off low.',
+      'Create a room in seconds, generate a clean code, and move people into a live video session without extra ceremony.',
   },
   {
-    icon: 'AI',
-    title: 'Smart meeting follow-up',
+    icon: 'JOIN',
+    title: 'No-friction joining',
     description:
-      'Highlight decisions, capture owners, and keep call outcomes visible so meetings actually move work forward.',
+      'Guests can join from one link, set a display name, and get into the room quickly on desktop or mobile.',
   },
   {
-    icon: 'SYNC',
-    title: 'Shared collaboration tools',
+    icon: 'VIEW',
+    title: 'Focused room experience',
     description:
-      'Screen sharing, quick notes, and in-room prompts help the whole group stay aligned without switching tabs.',
+      'Fullscreen mode, clean room layouts, and simple controls keep attention on the conversation instead of the interface.',
+  },
+  {
+    icon: 'LINK',
+    title: 'Shareable room flow',
+    description:
+      'Copy the room URL from the live sidebar, open it in another tab, and keep invites moving with one consistent link.',
+  },
+  {
+    icon: 'LOG',
+    title: 'Room history that helps',
+    description:
+      'Recent room visits are stored locally so you can revisit room IDs, participants, timestamps, and quick room details later.',
+  },
+  {
+    icon: 'APP',
+    title: 'Support and install built in',
+    description:
+      'Guide new users with the support assistant and install Talksy like an app for a faster, more native-feeling return.',
   },
 ];
 
 const workflow = [
   {
     step: 'Step 01',
-    title: 'Start a room',
-    description: 'Create a room code and share it in seconds without making anyone sign up first.',
+    title: 'Choose create or join',
+    description: 'Launch a fresh room code or jump into an existing one from the homepage without slowing down the start.',
   },
   {
     step: 'Step 02',
-    title: 'Run the call',
-    description: 'Use focus tools, live notes, and clean layouts to keep the conversation on track.',
+    title: 'Share and go live',
+    description: 'Send one link, set a display name, and move into the live room with a clear layout that works across devices.',
   },
   {
     step: 'Step 03',
-    title: 'Finish with clarity',
-    description: 'Capture decisions and action items before the room closes so nothing gets lost.',
+    title: 'Return with context',
+    description: 'Use history, demo rooms, and install shortcuts to make the next session even faster to reopen and run.',
   },
 ];
 
@@ -42,10 +60,11 @@ function FeaturesPage() {
     <section className="page-shell">
       <div className="page-hero">
         <span className="eyebrow">Features</span>
-        <h1>Everything you need for polished, lightweight online meetings.</h1>
+        <h1>Everything Talksy gives you to launch, run, and revisit live rooms without friction.</h1>
         <p>
-          Talksy keeps calls fast to start, simple to run, and structured enough to
-          turn conversations into outcomes.
+          From instant room creation to shareable links, fullscreen video, room history,
+          install shortcuts, and built-in support, Talksy keeps the product lightweight
+          without feeling bare.
         </p>
       </div>
 
@@ -61,20 +80,23 @@ function FeaturesPage() {
 
       <div className="page-band">
         <article className="insight-card accent-mint">
-          <span className="card-label">What teams notice first</span>
-          <h3>Less setup friction, fewer dropped attendees, and better call follow-through.</h3>
+          <span className="card-label">Why it feels faster</span>
+          <h3>Fewer steps before the conversation starts, and better context after it ends.</h3>
           <p>
-            Great meeting software should disappear into the background. Talksy is
-            designed to remove the overhead that slows teams down.
+            Talksy is intentionally opinionated: create or join quickly, keep the live
+            room clear, and make it easy to return to the same workflow later.
           </p>
         </article>
 
         <article className="detail-card">
-          <span className="card-label">Included in every plan</span>
+          <span className="card-label">Inside the product today</span>
           <ul className="detail-list">
-            <li>Quick room codes and one-click joins</li>
-            <li>Meeting notes and action-item prompts</li>
-            <li>Responsive layouts across desktop and mobile</li>
+            <li>Create and join modes directly from the homepage</li>
+            <li>No-sign-up guest entry with display names</li>
+            <li>Copyable room links and fullscreen live mode</li>
+            <li>Local room history with quick reopen context</li>
+            <li>Responsive layouts with light and dark themes</li>
+            <li>Support assistant, demo room access, and install help</li>
           </ul>
         </article>
       </div>

@@ -1,21 +1,21 @@
 const guides = [
   {
-    tag: 'Guide',
-    title: 'How to run concise weekly syncs',
+    tag: 'Setup',
+    title: 'Room launch checklist',
     description:
-      'A practical outline for planning short meetings that still end with clear decisions and ownership.',
+      'A host-first checklist for naming rooms, checking audio and video, copying the link, and entering with the right display name.',
   },
   {
-    tag: 'Template',
-    title: 'Meeting agenda starters',
+    tag: 'Workflow',
+    title: 'Repeatable meeting playbooks',
     description:
-      'Use ready-made prompts to structure planning calls, client reviews, and team retrospectives.',
+      'Starter ideas for stand-ups, client reviews, mentor sessions, and demo calls built around Talksy\'s create-or-join flow.',
   },
   {
-    tag: 'Library',
-    title: 'Remote collaboration playbooks',
+    tag: 'Follow-up',
+    title: 'History-first review routine',
     description:
-      'Explore repeatable systems for async updates, recurring check-ins, and recorded room summaries.',
+      'Use the history page to revisit room IDs, participant counts, timestamps, and quick room context without guessing later.',
   },
 ];
 
@@ -24,10 +24,11 @@ function ResourcesPage() {
     <section className="page-shell">
       <div className="page-hero">
         <span className="eyebrow">Resources</span>
-        <h1>Guides, templates, and ideas for smoother conversations.</h1>
+        <h1>Practical playbooks for getting more out of every Talksy room.</h1>
         <p>
-          The best meetings are designed before the room opens. Browse practical material
-          that helps teams communicate with less friction.
+          These starter resources mirror the way the product actually works: create or
+          join quickly, share one link, keep the room clear, and return with history
+          when you need context.
         </p>
       </div>
 
@@ -43,19 +44,21 @@ function ResourcesPage() {
 
       <div className="page-band">
         <article className="detail-card">
-          <span className="card-label">Most popular topics</span>
+          <span className="card-label">Most useful topics</span>
           <ul className="resource-list">
-            <li>Facilitation frameworks for high-stakes calls</li>
-            <li>Joining instructions that reduce attendee confusion</li>
-            <li>Ways to capture decisions without bloated documentation</li>
+            <li>Room naming systems for recurring sessions</li>
+            <li>Share-link habits that reduce attendee confusion</li>
+            <li>Mobile host checks before a live meeting starts</li>
+            <li>Demo-room rehearsal before a high-stakes call</li>
           </ul>
         </article>
 
         <article className="insight-card accent-lavender">
-          <span className="card-label">New this month</span>
-          <h3>Room launch checklist for first-time hosts</h3>
+          <span className="card-label">Best first read</span>
+          <h3>From first room test to repeatable host routine</h3>
           <p>
-            A simple checklist covering room names, introductions, call flow, and close-out actions.
+            Start with the launch checklist, then pair it with the support assistant and
+            pricing page when you are ready to turn a simple test into a repeatable rollout.
           </p>
         </article>
       </div>

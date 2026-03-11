@@ -40,7 +40,7 @@ const SUPPORT_KNOWLEDGE = [
     keywords: ['price', 'pricing', 'plan', 'plans', 'cost', 'starter', 'team', 'scale', 'free'],
     phrases: ['free plan', 'pricing plan', 'how much', 'monthly price'],
     answer:
-      'Talksy has three plan directions. Starter is free for personal calls and casual small-group rooms. Team is $24 per month for structured collaboration, meeting notes, action prompts, priority branding, and advanced layouts. Scale is $79 per month for higher-volume teams, onboarding, reporting, and custom support workflows.',
+      'Talksy has three plan directions. Starter is free and covers the core flow: create or join rooms, share one clean link, let guests enter with a display name, and keep local room history. Team is $24 per month for a more repeatable workflow with install support, recurring room guidance, and stronger host setup. Scale is $79 per month for broader rollouts, launch support, room planning, and custom support workflows.',
     actions: [
       { label: 'Review pricing', to: '/pricing' },
       { label: 'Open demo room', to: '/video/demo-room' },
@@ -49,10 +49,10 @@ const SUPPORT_KNOWLEDGE = [
   {
     id: 'rooms',
     title: 'Rooms and joining',
-    keywords: ['room', 'join', 'link', 'code', 'invite', 'meeting', 'demo', 'call', 'launch'],
+    keywords: ['room', 'join', 'link', 'code', 'invite', 'meeting', 'demo', 'call', 'launch', 'share', 'fullscreen'],
     phrases: ['start a room', 'join room', 'share a link', 'demo room', 'room code'],
     answer:
-      'Talksy is designed for fast room setup. You can launch a room, share the room code or link, and let participants join without heavy setup. The product positioning across the site emphasizes quick room codes, one-click joins, and a lightweight meeting flow.',
+      'Talksy is designed for fast room setup. You can create or join a room from the homepage, share the room code or full link, let guests set a display name, and move into a live room with a clear layout and fullscreen option.',
     actions: [
       { label: 'Try a demo room', to: '/video/demo-room' },
       { label: 'See features', to: '/features' },
@@ -64,7 +64,7 @@ const SUPPORT_KNOWLEDGE = [
     keywords: ['signup', 'sign', 'account', 'login', 'register', 'registration', 'without'],
     phrases: ['no sign up', 'without sign up', 'need an account', 'create account'],
     answer:
-      'The current Talksy experience is framed around low-friction joining. The homepage copy says there is no sign up required, and the onboarding flow focuses on sharing one link and launching rooms quickly.',
+      'Talksy is positioned around low-friction access. Guests can join with a room link, enter a display name, and get into the meeting flow without being forced through a heavy account or sign-up step first.',
     actions: [
       { label: 'Get started', to: '/get-started' },
       { label: 'Open demo room', to: '/video/demo-room' },
@@ -73,10 +73,10 @@ const SUPPORT_KNOWLEDGE = [
   {
     id: 'features',
     title: 'Product features',
-    keywords: ['feature', 'features', 'notes', 'actions', 'follow-up', 'share', 'screen', 'mobile', 'responsive', 'layout', 'audio', 'video'],
-    phrases: ['what features', 'screen share', 'meeting notes', 'action items', 'mobile support'],
+    keywords: ['feature', 'features', 'share', 'screen', 'mobile', 'responsive', 'layout', 'audio', 'video', 'history', 'install', 'fullscreen', 'theme'],
+    phrases: ['what features', 'mobile support', 'room history', 'install app', 'fullscreen mode'],
     answer:
-      'Talksy focuses on crystal-clear rooms, smart meeting follow-up, and shared collaboration tools. The feature pages also mention meeting notes, action-item prompts, responsive layouts, quick joins, and collaboration support that keeps calls simple and polished.',
+      'Talksy focuses on instant live rooms, no-sign-up guest entry, shareable room links, fullscreen viewing, local room history, responsive layouts, light and dark themes, install help, and a built-in support assistant that helps people understand the product fast.',
     actions: [
       { label: 'Explore features', to: '/features' },
       { label: 'Review plans', to: '/pricing' },
@@ -100,7 +100,7 @@ const SUPPORT_KNOWLEDGE = [
     keywords: ['resource', 'resources', 'guide', 'template', 'playbook', 'agenda', 'checklist', 'library'],
     phrases: ['meeting agenda', 'resources page', 'guides and templates'],
     answer:
-      'The resources section is built around practical guidance: concise weekly syncs, meeting agenda starters, remote collaboration playbooks, and room launch checklists for first-time hosts.',
+      'The resources section is built around practical Talksy workflows: room launch checklists, repeatable meeting playbooks, room naming habits, mobile host checks, and history-first routines for reviewing previous sessions.',
     actions: [
       { label: 'Browse resources', to: '/resources' },
       { label: 'Get started', to: '/get-started' },
@@ -112,7 +112,7 @@ const SUPPORT_KNOWLEDGE = [
     keywords: ['start', 'started', 'onboarding', 'setup', 'first', 'session', 'onboard', 'workflow'],
     phrases: ['get started', 'first session', 'how to begin', 'set up'],
     answer:
-      'A good first path is: choose the room style that fits your call rhythm, invite people with one link, launch your first meeting, and capture action items immediately. The site also recommends starting with a demo room, reviewing features, then choosing a plan when your workflow is clearer.',
+      'A strong first path is: choose Create or Join, share the room link, set a display name, test the live room on mobile and desktop, then use history and install shortcuts once the workflow starts repeating. The site also recommends beginning with a demo room before choosing a plan.',
     actions: [
       { label: 'Get started', to: '/get-started' },
       { label: 'Open demo room', to: '/video/demo-room' },
@@ -124,7 +124,7 @@ const SUPPORT_KNOWLEDGE = [
     keywords: ['support', 'human', 'talk', 'contact', 'walkthrough', 'custom', 'workflow', 'direction'],
     phrases: ['need support', 'talk to someone', 'book walkthrough', 'custom workflow'],
     answer:
-      'If someone needs more direction, Talksy points them toward a walkthrough, a demo room, or the pricing and feature pages depending on where they are in the decision process. For custom workflows, the solutions and pricing paths are the best next step.',
+      'If someone needs more direction, Talksy can point them toward a demo room, the features page, pricing, or a rollout path depending on where they are in the decision process. Support is best for explaining setup, features, room flow, and which plan fits.',
     actions: [
       { label: 'Book walkthrough', to: '/get-started' },
       { label: 'See pricing', to: '/pricing' },
@@ -186,7 +186,7 @@ export function buildSupportReply(input) {
 
   if (hasThanks(message)) {
     return {
-      body: 'You are welcome. If you want, ask another question or jump to pricing, features, or a demo room.',
+      body: 'You are welcome. Ask another question or jump to pricing, features, support, or a demo room when you are ready.',
       actions: [
         { label: 'Open demo room', to: '/video/demo-room' },
         { label: 'Go to features', to: '/features' },
@@ -196,7 +196,7 @@ export function buildSupportReply(input) {
 
   if (hasGreeting(message)) {
     return {
-      body: 'Hi. I am the Talksy support assistant. I can help viewers with pricing, room setup, features, onboarding, resources, and use cases.',
+      body: 'Hi. I am the Talksy support assistant. I can help with pricing, room setup, link sharing, room history, product features, onboarding, resources, and use cases.',
       actions: [
         { label: 'Ask about plans', to: '/pricing' },
         { label: 'Open support', to: '/support' },
@@ -225,7 +225,7 @@ export function buildSupportReply(input) {
 
   return {
     body:
-      'I can answer viewer questions about Talksy pricing, joining rooms, no-sign-up access, features, onboarding, resources, and supported use cases. Ask in a more specific way and I will point you to the right answer.',
+      'I can answer questions about Talksy pricing, creating or joining rooms, no-sign-up access, room history, product features, onboarding, resources, install help, and supported use cases. Ask in a more specific way and I will point you to the right answer.',
     actions: [
       { label: 'See solutions', to: '/solutions' },
       { label: 'Open demo room', to: '/video/demo-room' },
