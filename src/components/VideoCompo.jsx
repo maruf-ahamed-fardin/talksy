@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { addCallHistoryEntry } from '../data/callHistory';
 
 const participants = [
   { name: 'Ari', color: 'blue' },
@@ -16,6 +18,14 @@ const checklist = [
 function VideoCompo() {
   const { roomId } = useParams();
   const activeRoom = roomId || 'instant-room';
+
+  useEffect(() => {
+    addCallHistoryEntry({
+      roomId: activeRoom,
+      participants: participants.map((participant) => participant.name),
+      checklist,
+    });
+  }, [activeRoom]);
 
   return (
     <section className="page-shell room-page">
@@ -65,10 +75,10 @@ function VideoCompo() {
 
           <div className="detail-card">
             <span className="card-label">Next steps</span>
-            <p>Need a better setup before you start? Explore templates, pricing, or quick-start guidance.</p>
+            <p>Need a better setup before you start? Review history, explore templates, or compare plans.</p>
             <div className="stacked-actions">
-              <Link className="inline-button" to="/features">
-                Browse features
+              <Link className="inline-button" to="/history">
+                View history
               </Link>
               <Link className="inline-button inline-button--secondary" to="/pricing">
                 Compare plans

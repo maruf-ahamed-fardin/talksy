@@ -246,6 +246,15 @@ function Hero() {
             <Link className="text-link" to="/pricing">
               See pricing
             </Link>
+            <Link className="hero-shortcut" to="/history">
+              <span aria-hidden="true" className="hero-shortcut__icon">
+                <svg fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+                  <path d="M12 7.6v4.8l3 1.7" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                </svg>
+              </span>
+              <span>History</span>
+            </Link>
           </div>
         </div>
 

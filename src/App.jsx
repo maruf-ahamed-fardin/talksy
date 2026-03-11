@@ -11,6 +11,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import ChatPage from './pages/ChatPage';
 import PricingPage from './pages/PricingPage';
 import GetStartedPage from './pages/GetStartedPage';
+import HistoryPage from './pages/HistoryPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function SiteLayout() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/support" element={<ChatPage />} />
         <Route path="/chat" element={<Navigate replace to="/support" />} />
+        <Route path="/history" element={<HistoryPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/video" element={<VideoCompo />} />
