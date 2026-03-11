@@ -46,25 +46,9 @@ const SCROLL_REVEAL_SELECTOR = [
   '.not-found',
 ].join(', ');
 
-const THEME_STORAGE_KEY = 'talksy.theme.v1';
-
-function resolveInitialTheme() {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
-
-  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-
-  if (storedTheme === 'dark' || storedTheme === 'light') {
-    return storedTheme;
-  }
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function SiteLayout() {
   const { pathname } = useLocation();
-  const [theme, setTheme] = useState(resolveInitialTheme);
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -73,7 +57,6 @@ function SiteLayout() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
 
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
@@ -91,7 +74,7 @@ function SiteLayout() {
 
     targets.forEach((target, index) => {
       target.classList.add('scroll-reveal');
-      target.style.setProperty('--reveal-delay', `${(index % 4) * 80}ms`);
+      target.style.setProperty('--reveal-delay', `${(index % 4) * 48}ms`);
     });
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -117,8 +100,8 @@ function SiteLayout() {
         });
       },
       {
-        threshold: 0.16,
-        rootMargin: '0px 0px -10% 0px',
+        threshold: 0.1,
+        rootMargin: '0px 0px -4% 0px',
       },
     );
 

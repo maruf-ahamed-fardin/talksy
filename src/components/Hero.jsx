@@ -24,7 +24,7 @@ function getCurrentOffset(node) {
   return { x: matrix.m41, y: matrix.m42 };
 }
 
-function DraggableFloat({ className, children }) {
+function DraggableFloat({ className, children, dragHandleSelector = null }) {
   const nodeRef = useRef(null);
   const returnTimerRef = useRef(null);
   const returnFrameRef = useRef(null);
@@ -127,6 +127,15 @@ function DraggableFloat({ className, children }) {
       return;
     }
 
+    if (dragHandleSelector) {
+      const pointerTarget = event.target instanceof Element ? event.target : null;
+      const dragHandle = pointerTarget?.closest(dragHandleSelector);
+
+      if (!dragHandle || !node.contains(dragHandle)) {
+        return;
+      }
+    }
+
     event.preventDefault();
     clearPendingReturn();
 
@@ -184,6 +193,7 @@ function DraggableFloat({ className, children }) {
   return (
     <div
       className={`hero-float ${className}${isDragging ? ' is-dragging' : ''}${isReturning ? ' is-returning' : ''}`}
+      data-drag-scope={dragHandleSelector ? 'handle' : 'full'}
       data-dragging={isDragging}
       onDragStart={(event) => event.preventDefault()}
       onLostPointerCapture={handleLostPointerCapture}
@@ -375,7 +385,7 @@ function Hero() {
             <div className="hero-status hero-status--bottom">Share</div>
           </DraggableFloat>
 
-          <DraggableFloat className="hero-float--figure">
+          <DraggableFloat className="hero-float--figure" dragHandleSelector=".hero-body, .hero-seat">
             <div className="hero-figure">
               <div className="hero-seat" />
               <div className="hero-body">
