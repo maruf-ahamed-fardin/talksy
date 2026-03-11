@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { createRoom, normalizeRoomId, roomExists } from '../data/roomRegistry';
 
 const RETURN_DELAY_MS = 120000;
+const GENERATED_ROOM_PREFIX = 'room-';
 
 function getCurrentOffset(node) {
   if (!node) {
@@ -206,19 +208,54 @@ function DraggableFloat({ className, children }) {
 function Hero() {
   const [roomMode, setRoomMode] = useState('join');
   const [roomId, setRoomId] = useState('');
+  const [roomError, setRoomError] = useState('');
   const navigate = useNavigate();
+
+  const roomHint = roomMode === 'join'
+    ? 'Join only works with an existing room ID.'
+    : 'Create only makes a new room. Leave the field empty to generate a code.';
+
+  const handleRoomModeChange = (nextMode) => {
+    setRoomMode(nextMode);
+    setRoomError('');
+  };
+
+  const handleRoomIdChange = (event) => {
+    setRoomId(event.target.value);
+    setRoomError('');
+  };
 
   const handleRoomSubmit = (event) => {
     event.preventDefault();
 
-    const normalizedRoomId = roomId.trim().replace(/\s+/g, '-').toLowerCase();
-    const fallbackRoomId = roomMode === 'create'
-      ? `room-${Date.now().toString(36)}`
-      : 'instant-room';
+    const normalizedRoomId = normalizeRoomId(roomId);
 
-    const nextRoomId = normalizedRoomId || fallbackRoomId;
+    if (roomMode === 'join') {
+      if (!normalizedRoomId) {
+        setRoomError('Enter an existing room ID to join.');
+        return;
+      }
 
-    navigate(`/video/${encodeURIComponent(nextRoomId)}`);
+      if (!roomExists(normalizedRoomId)) {
+        setRoomError('This room ID has not been created yet. Use Create to start a new room.');
+        return;
+      }
+
+      setRoomError('');
+      navigate(`/video/${encodeURIComponent(normalizedRoomId)}`);
+      return;
+    }
+
+    const nextRoomId = normalizedRoomId || `${GENERATED_ROOM_PREFIX}${Date.now().toString(36)}`;
+    const createdRoom = createRoom(nextRoomId);
+
+    if (!createdRoom) {
+      setRoomError('This room ID already exists. Choose a new code or switch to Join.');
+      return;
+    }
+
+    setRoomError('');
+    navigate(`/video/${encodeURIComponent(createdRoom.roomId)}`);
   };
 
   return (
@@ -237,7 +274,7 @@ function Hero() {
               <button
                 aria-selected={roomMode === 'join'}
                 className={`hero-mode-toggle__option${roomMode === 'join' ? ' is-active' : ''}`}
-                onClick={() => setRoomMode('join')}
+                onClick={() => handleRoomModeChange('join')}
                 role="tab"
                 type="button"
               >
@@ -246,7 +283,7 @@ function Hero() {
               <button
                 aria-selected={roomMode === 'create'}
                 className={`hero-mode-toggle__option${roomMode === 'create' ? ' is-active' : ''}`}
-                onClick={() => setRoomMode('create')}
+                onClick={() => handleRoomModeChange('create')}
                 role="tab"
                 type="button"
               >
@@ -257,9 +294,10 @@ function Hero() {
               <div className="hero-form__row">
                 <input
                   aria-label={roomMode === 'join' ? 'Room ID' : 'New room ID'}
-                  className="hero-input"
-                  onChange={(event) => setRoomId(event.target.value)}
-                  placeholder={roomMode === 'join' ? 'Enter Room Id' : 'Choose Room Id'}
+                  aria-describedby="hero-room-message"
+                  className={`hero-input${roomError ? ' is-invalid' : ''}`}
+                  onChange={handleRoomIdChange}
+                  placeholder={roomMode === 'join' ? 'Enter existing room ID' : 'Choose a new room ID'}
                   type="text"
                   value={roomId}
                 />
@@ -270,6 +308,13 @@ function Hero() {
                   {roomMode === 'join' ? 'Join Room' : 'Create Room'}
                 </button>
               </div>
+              <p
+                className={`hero-form__message${roomError ? ' is-error' : ''}`}
+                id="hero-room-message"
+                role={roomError ? 'alert' : undefined}
+              >
+                {roomError || roomHint}
+              </p>
             </form>
           </div>
 

@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -46,12 +46,41 @@ const SCROLL_REVEAL_SELECTOR = [
   '.not-found',
 ].join(', ');
 
+const THEME_STORAGE_KEY = 'talksy.theme.v1';
+
+function resolveInitialTheme() {
+  if (typeof window === 'undefined') {
+    return 'light';
+  }
+
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+
+  if (storedTheme === 'dark' || storedTheme === 'light') {
+    return storedTheme;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 function SiteLayout() {
   const { pathname } = useLocation();
+  const [theme, setTheme] = useState(resolveInitialTheme);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', theme === 'dark' ? '#070d18' : '#f4f5f7');
+    }
+  }, [theme]);
 
   useLayoutEffect(() => {
     const targets = Array.from(document.querySelectorAll(SCROLL_REVEAL_SELECTOR));
@@ -106,7 +135,10 @@ function SiteLayout() {
 
   return (
     <div className="app-shell">
-      <Navbar />
+      <Navbar
+        onToggleTheme={() => setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))}
+        theme={theme}
+      />
       <main className="site-main">
         <Outlet />
       </main>

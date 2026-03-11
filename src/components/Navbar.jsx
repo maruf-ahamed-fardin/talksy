@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import InstallHelpDialog from './InstallHelpDialog';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 const navItems = [
   { label: 'Home', to: '/' },
@@ -10,84 +12,19 @@ const navItems = [
   { label: 'Pricing', to: '/pricing' },
 ];
 
-function isStandaloneMode() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-
-function isIosDevice() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-}
-
-function isSafariBrowser() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  const userAgent = window.navigator.userAgent;
-  return /safari/i.test(userAgent) && !/crios|fxios|edgios|chrome|android/i.test(userAgent);
-}
-
-function Navbar() {
+function Navbar({ theme, onToggleTheme }) {
   const [openPath, setOpenPath] = useState(null);
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstalled, setIsInstalled] = useState(() => isStandaloneMode());
-  const [showInstallHelp, setShowInstallHelp] = useState(false);
   const { pathname } = useLocation();
   const menuOpen = openPath === pathname;
-  const isIos = isIosDevice();
-  const isSafari = isSafariBrowser();
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault();
-      setInstallPrompt(event);
-      setIsInstalled(false);
-    };
-
-    const handleAppInstalled = () => {
-      setInstallPrompt(null);
-      setIsInstalled(true);
-    };
-
-    const handleDisplayModeChange = (event) => {
-      setIsInstalled(event.matches || window.navigator.standalone === true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-    mediaQuery.addEventListener?.('change', handleDisplayModeChange);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-      mediaQuery.removeEventListener?.('change', handleDisplayModeChange);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (isInstalled) {
-      return;
-    }
-
-    if (installPrompt) {
-      await installPrompt.prompt();
-      await installPrompt.userChoice.catch(() => undefined);
-      setInstallPrompt(null);
-      return;
-    }
-
-    setShowInstallHelp(true);
-  };
+  const isDarkTheme = theme === 'dark';
+  const {
+    handleInstallClick,
+    isInstalled,
+    isIos,
+    isSafari,
+    setShowInstallHelp,
+    showInstallHelp,
+  } = useInstallPrompt();
 
   return (
     <header className="site-header">
@@ -96,20 +33,6 @@ function Navbar() {
           <span className="brand-mark__glyph">T</span>
           Talksy
         </Link>
-
-        <button
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          className={`nav-toggle ${menuOpen ? 'is-open' : ''}`}
-          onClick={() => setOpenPath((current) => (current === pathname ? null : pathname))}
-          type="button"
-        >
-          <span aria-hidden="true" className="nav-toggle__icon">
-            <span className="nav-toggle__line" />
-            <span className="nav-toggle__line" />
-            <span className="nav-toggle__line" />
-          </span>
-        </button>
 
         <nav className={`nav-links ${menuOpen ? 'is-open' : ''}`}>
           {navItems.map((item) => (
@@ -125,7 +48,7 @@ function Navbar() {
 
           {!isInstalled ? (
             <button
-              className="nav-install"
+              className="nav-install nav-install--mobile-only"
               onClick={handleInstallClick}
               title="Install the Talksy app"
               type="button"
@@ -145,52 +68,48 @@ function Navbar() {
             Get started
           </Link>
         </nav>
+
+        <div className="nav-actions">
+          <button
+            aria-label={isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={isDarkTheme}
+            className="nav-theme-switch"
+            onClick={onToggleTheme}
+            type="button"
+          >
+            <span aria-hidden="true" className="nav-theme-switch__icon">
+              {isDarkTheme ? (
+                <svg fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.8" />
+                  <path d="M12 2.75v2.5M12 18.75v2.5M21.25 12h-2.5M5.25 12h-2.5M18.54 5.46l-1.77 1.77M7.23 16.77l-1.77 1.77M18.54 18.54l-1.77-1.77M7.23 7.23 5.46 5.46" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                </svg>
+              ) : (
+                <svg fill="none" viewBox="0 0 24 24">
+                  <path d="M20.2 14.6a8.55 8.55 0 1 1-10.8-10.8 7.1 7.1 0 0 0 10.8 10.8Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.8" />
+                </svg>
+              )}
+            </span>
+            <span className="nav-theme-switch__label">{isDarkTheme ? 'Dark' : 'Light'}</span>
+          </button>
+
+          <button
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            className={`nav-toggle ${menuOpen ? 'is-open' : ''}`}
+            onClick={() => setOpenPath((current) => (current === pathname ? null : pathname))}
+            type="button"
+          >
+            <span aria-hidden="true" className="nav-toggle__icon">
+              <span className="nav-toggle__line" />
+              <span className="nav-toggle__line" />
+              <span className="nav-toggle__line" />
+            </span>
+          </button>
+        </div>
       </div>
 
       {showInstallHelp && !isInstalled ? (
-        <div className="install-help-backdrop" onClick={() => setShowInstallHelp(false)} role="presentation">
-          <div
-            aria-labelledby="install-help-title"
-            aria-modal="true"
-            className="install-help-dialog"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-          >
-            <span className="card-label">Install Talksy</span>
-            <h3 id="install-help-title">
-              {isIos ? 'Install on your iPhone or iPad' : 'Install from your browser menu'}
-            </h3>
-            <p>
-              {isIos && isSafari
-                ? 'Tap the Share button in Safari, then choose Add to Home Screen.'
-                : null}
-              {isIos && !isSafari
-                ? 'Open this site in Safari first, then tap Share and choose Add to Home Screen.'
-                : null}
-              {!isIos
-                ? 'If the native install prompt is not ready yet, open your browser menu and choose Install app or Add to Home screen. This also requires HTTPS or a production preview build.'
-                : null}
-            </p>
-            <div className="install-help-steps">
-              {isIos ? (
-                <>
-                  <span>1. Open the browser share menu.</span>
-                  <span>2. Find Add to Home Screen.</span>
-                  <span>3. Confirm to install Talksy.</span>
-                </>
-              ) : (
-                <>
-                  <span>1. Open the browser menu.</span>
-                  <span>2. Tap Install app or Add to Home screen.</span>
-                  <span>3. Accept the install prompt.</span>
-                </>
-              )}
-            </div>
-            <button className="nav-install install-help-close" onClick={() => setShowInstallHelp(false)} type="button">
-              Close
-            </button>
-          </div>
-        </div>
+        <InstallHelpDialog isIos={isIos} isSafari={isSafari} onClose={() => setShowInstallHelp(false)} />
       ) : null}
     </header>
   );

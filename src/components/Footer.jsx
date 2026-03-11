@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import InstallHelpDialog from './InstallHelpDialog';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 const columns = [
   {
@@ -43,6 +45,14 @@ const columns = [
 function Footer() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const {
+    handleInstallClick,
+    isInstalled,
+    isIos,
+    isSafari,
+    setShowInstallHelp,
+    showInstallHelp,
+  } = useInstallPrompt();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -58,6 +68,32 @@ function Footer() {
   return (
     <footer className="site-footer">
       <div className="section-shell footer-top">
+        {!isInstalled ? (
+          <div className="footer-install-card">
+            <div className="footer-install-card__copy">
+              <span className="eyebrow eyebrow-light">Install Talksy</span>
+              <h3>Do you want to install our app?</h3>
+              <p>Get a faster desktop launch, quick access to your rooms, and an app-like Talksy experience.</p>
+            </div>
+
+            <button
+              className="nav-install footer-install__button"
+              onClick={handleInstallClick}
+              title="Install the Talksy app"
+              type="button"
+            >
+              <span aria-hidden="true" className="nav-install__icon">
+                <svg fill="none" viewBox="0 0 24 24">
+                  <path d="M12 4.5v8.25" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                  <path d="m8.5 10.75 3.5 3.5 3.5-3.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                  <path d="M5.5 16.5h13" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+                </svg>
+              </span>
+              <span className="nav-install__label">Install</span>
+            </button>
+          </div>
+        ) : null}
+
         <div className="newsletter-card">
           <div>
             <span className="eyebrow eyebrow-light">Stay in the loop</span>
@@ -93,6 +129,10 @@ function Footer() {
           </div>
         ))}
       </div>
+
+      {showInstallHelp && !isInstalled ? (
+        <InstallHelpDialog isIos={isIos} isSafari={isSafari} onClose={() => setShowInstallHelp(false)} />
+      ) : null}
     </footer>
   );
 }
