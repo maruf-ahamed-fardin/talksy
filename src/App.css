@@ -18,10 +18,14 @@
 
 #root {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
 }
 
 .app-shell {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   color: var(--text);
   background:
     radial-gradient(circle at top center, rgba(47, 99, 245, 0.06), transparent 24%),
@@ -2786,11 +2790,122 @@ button:focus-visible,
   }
 }
 
+@media (max-width: 960px) {
+  .section-shell,
+  .page-shell,
+  .nav-wrap {
+    width: min(1120px, calc(100% - 36px));
+  }
+
+  .nav-wrap {
+    padding: 15px 18px;
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 4px;
+  }
+
+  .nav-link {
+    padding: 11px 12px;
+    font-size: 0.92rem;
+  }
+
+  .nav-install {
+    min-height: 42px;
+    padding: 0 14px 0 10px;
+  }
+
+  .nav-cta {
+    min-height: 48px;
+    padding: 0 20px;
+  }
+
+  .hero-grid,
+  .brand-section {
+    gap: 28px;
+  }
+
+  .hero-copy {
+    max-width: 720px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.9rem, 7.6vw, 4.6rem);
+  }
+
+  .hero-form {
+    max-width: min(100%, 560px);
+  }
+
+  .hero-actions {
+    gap: 18px;
+  }
+
+  .hero-visual {
+    min-height: 560px;
+  }
+
+  .hero-visual__beam {
+    inset: 16% 9% 11%;
+  }
+
+  .hero-float--glow-pink {
+    right: 18px;
+  }
+
+  .hero-float--glow-blue {
+    left: 8px;
+    bottom: 42px;
+  }
+
+  .hero-float--avatar-left {
+    left: 8px;
+  }
+
+  .hero-float--avatar-right {
+    right: 12px;
+  }
+
+  .hero-float--status-top {
+    left: 50%;
+  }
+
+  .hero-float--status-middle {
+    left: 8px;
+  }
+
+  .hero-float--status-bottom {
+    right: 12px;
+  }
+
+  .hero-float--figure {
+    right: 24px;
+  }
+}
+
 @media (max-width: 780px) {
   .section-shell,
   .page-shell,
   .nav-wrap {
-    width: min(100% - 28px, 1120px);
+    width: min(1120px, calc(100% - 28px));
+  }
+
+  .hero-copy,
+  .brand-copy {
+    text-align: center;
+  }
+
+  .hero-copy .eyebrow,
+  .brand-copy .eyebrow {
+    justify-content: center;
+  }
+
+  .hero-copy p,
+  .brand-copy p {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 34ch;
   }
 
   .nav-toggle {
@@ -3076,6 +3191,11 @@ button:focus-visible,
     padding: 8px;
   }
 
+  .hero-form {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .hero-visual {
     min-height: 500px;
   }
@@ -3086,48 +3206,48 @@ button:focus-visible,
 
   .hero-float--glow-pink {
     top: 124px;
-    right: 16px;
+    right: 8px;
     --float-scale: 0.78;
   }
 
   .hero-float--glow-blue {
-    left: 0;
+    left: 4px;
     bottom: 38px;
     --float-scale: 0.78;
   }
 
   .hero-float--avatar-left {
     top: 104px;
-    left: 0;
+    left: 4px;
     --float-scale: 0.92;
   }
 
   .hero-float--avatar-right {
     top: 116px;
-    right: 0;
+    right: 4px;
     --float-scale: 0.92;
   }
 
   .hero-float--status-top {
     top: 20px;
-    left: 54%;
+    left: 50%;
     --float-scale: 0.88;
   }
 
   .hero-float--status-middle {
     top: 324px;
-    left: -14px;
+    left: 4px;
     --float-scale: 0.82;
   }
 
   .hero-float--status-bottom {
-    right: 8px;
+    right: 6px;
     bottom: 70px;
     --float-scale: 0.82;
   }
 
   .hero-float--figure {
-    right: 16px;
+    right: 10px;
     bottom: 20px;
     --float-scale: 0.76;
   }
@@ -3294,7 +3414,12 @@ button:focus-visible,
   .section-shell,
   .page-shell,
   .nav-wrap {
-    width: min(100% - 20px, 1120px);
+    width: min(1120px, calc(100% - 20px));
+  }
+
+  .hero-copy p,
+  .brand-copy p {
+    max-width: 30ch;
   }
 
   .section-gap {
@@ -3325,37 +3450,37 @@ button:focus-visible,
 
   .hero-float--avatar-left {
     top: 96px;
-    left: -4px;
+    left: 0;
     --float-scale: 0.8;
   }
 
   .hero-float--avatar-right {
     top: 112px;
-    right: -8px;
+    right: 0;
     --float-scale: 0.8;
   }
 
   .hero-float--status-top {
     top: 12px;
-    left: 58%;
+    left: 50%;
     --float-scale: 0.76;
   }
 
   .hero-float--status-middle {
     top: 272px;
-    left: -10px;
+    left: 2px;
     --float-scale: 0.68;
   }
 
   .hero-float--status-bottom {
-    right: -2px;
+    right: 4px;
     bottom: 56px;
     --float-scale: 0.68;
   }
 
   .hero-float--figure {
-    right: -6px;
-    bottom: 2px;
+    right: 4px;
+    bottom: 4px;
     --float-scale: 0.6;
   }
 
