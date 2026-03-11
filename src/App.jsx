@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect } from 'react';
-import { Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './components/Home';
@@ -8,6 +8,7 @@ import VideoCompo from './components/VideoCompo';
 import FeaturesPage from './pages/FeaturesPage';
 import SolutionsPage from './pages/SolutionsPage';
 import ResourcesPage from './pages/ResourcesPage';
+import ChatPage from './pages/ChatPage';
 import PricingPage from './pages/PricingPage';
 import GetStartedPage from './pages/GetStartedPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -38,6 +39,8 @@ function App() {
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/solutions" element={<SolutionsPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/support" element={<ChatPage />} />
+        <Route path="/chat" element={<Navigate replace to="/support" />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/video" element={<VideoCompo />} />
