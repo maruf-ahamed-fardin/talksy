@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createRoom, normalizeRoomId, roomExists } from '../data/roomRegistry';
 
@@ -38,6 +38,16 @@ function DraggableFloat({ className, children, dragHandleSelector = null }) {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [isReturning, setIsReturning] = useState(false);
+
+  const releasePointerCapture = (node, pointerId) => {
+    if (!node || pointerId === undefined || typeof node.hasPointerCapture !== 'function') {
+      return;
+    }
+
+    if (node.hasPointerCapture(pointerId)) {
+      node.releasePointerCapture(pointerId);
+    }
+  };
 
   const clearPendingReturn = () => {
     if (returnTimerRef.current) {
@@ -94,6 +104,56 @@ function DraggableFloat({ className, children, dragHandleSelector = null }) {
 
   useEffect(() => () => {
     clearPendingReturn();
+  }, []);
+
+  const handleDragMove = useEffectEvent((event) => {
+    const dragState = dragStateRef.current;
+
+    if (!dragState.active || dragState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const node = nodeRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    const nextX = dragState.originX + (event.clientX - dragState.startX);
+    const nextY = dragState.originY + (event.clientY - dragState.startY);
+
+    syncOffset(node, nextX, nextY);
+  });
+
+  const handleDragEnd = useEffectEvent((pointerId) => {
+    const node = nodeRef.current;
+
+    releasePointerCapture(node, pointerId);
+    endDrag(pointerId);
+  });
+
+  useEffect(() => {
+    const handleWindowPointerMove = (event) => {
+      handleDragMove(event);
+    };
+
+    const handleWindowPointerUp = (event) => {
+      handleDragEnd(event.pointerId);
+    };
+
+    window.addEventListener('pointermove', handleWindowPointerMove, { passive: false });
+    window.addEventListener('pointerup', handleWindowPointerUp);
+    window.addEventListener('pointercancel', handleWindowPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handleWindowPointerMove);
+      window.removeEventListener('pointerup', handleWindowPointerUp);
+      window.removeEventListener('pointercancel', handleWindowPointerUp);
+    };
   }, []);
 
   const endDrag = (pointerId) => {
@@ -158,32 +218,11 @@ function DraggableFloat({ className, children, dragHandleSelector = null }) {
   };
 
   const handlePointerMove = (event) => {
-    const dragState = dragStateRef.current;
-
-    if (!dragState.active || dragState.pointerId !== event.pointerId) {
-      return;
-    }
-
-    const node = nodeRef.current;
-
-    if (!node) {
-      return;
-    }
-
-    const nextX = dragState.originX + (event.clientX - dragState.startX);
-    const nextY = dragState.originY + (event.clientY - dragState.startY);
-
-    syncOffset(node, nextX, nextY);
+    handleDragMove(event);
   };
 
   const handlePointerUp = (event) => {
-    const node = nodeRef.current;
-
-    if (node?.hasPointerCapture(event.pointerId)) {
-      node.releasePointerCapture(event.pointerId);
-    }
-
-    endDrag(event.pointerId);
+    handleDragEnd(event.pointerId);
   };
 
   const handleLostPointerCapture = (event) => {

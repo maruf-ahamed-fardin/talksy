@@ -31,13 +31,29 @@ export function normalizeRoomId(value) {
 }
 
 export function readZegoServerConfig() {
-  const appId = Number.parseInt(process.env.ZEGO_APP_ID ?? process.env.VITE_ZEGO_APP_ID ?? '', 10);
-  const serverSecret = (process.env.ZEGO_SERVER_SECRET ?? process.env.VITE_ZEGO_SERVER_SECRET ?? '').trim();
+  const rawAppId = `${process.env.ZEGO_APP_ID ?? process.env.VITE_ZEGO_APP_ID ?? ''}`.trim();
+  const rawServerSecret = `${process.env.ZEGO_SERVER_SECRET ?? process.env.VITE_ZEGO_SERVER_SECRET ?? ''}`.trim();
+  const appId = Number.parseInt(rawAppId, 10);
+  const serverSecret = rawServerSecret;
+  const hasPlaceholderValues =
+    /your_app_id/i.test(rawAppId) ||
+    /your_server_secret/i.test(rawServerSecret) ||
+    /placeholder/i.test(rawAppId) ||
+    /placeholder/i.test(rawServerSecret);
+  const isConfigured = !hasPlaceholderValues && appId > 0 && serverSecret.length > 0;
+  let configError = '';
+
+  if (hasPlaceholderValues) {
+    configError = 'ZEGO placeholder values are still configured on the server. Replace them with your real AppID and ServerSecret, then redeploy.';
+  } else if (!(appId > 0) || serverSecret.length === 0) {
+    configError = 'ZEGO credentials are missing on the server. Add ZEGO_APP_ID and ZEGO_SERVER_SECRET, then redeploy.';
+  }
 
   return {
     appId,
+    configError,
     serverSecret,
-    isConfigured: appId > 0 && serverSecret.length > 0,
+    isConfigured,
   };
 }
 

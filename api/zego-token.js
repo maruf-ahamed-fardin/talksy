@@ -24,11 +24,11 @@ export default function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { appId, serverSecret, isConfigured } = readZegoServerConfig();
+  const { appId, configError, serverSecret, isConfigured } = readZegoServerConfig();
 
   if (!isConfigured) {
     return res.status(500).json({
-      error: 'ZEGO credentials are missing on the server. Add ZEGO_APP_ID and ZEGO_SERVER_SECRET, then redeploy.',
+      error: configError || 'ZEGO credentials are missing on the server. Add ZEGO_APP_ID and ZEGO_SERVER_SECRET, then redeploy.',
     });
   }
 

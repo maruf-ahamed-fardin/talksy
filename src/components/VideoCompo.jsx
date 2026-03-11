@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import { addCallHistoryEntry } from '../data/callHistory';
+import { loadZegoUIKitPrebuilt } from '../lib/loadZegoUIKit';
 
 const DEV_ZEGO_APP_ID = Number.parseInt(import.meta.env.VITE_ZEGO_APP_ID ?? '', 10);
 const DEV_ZEGO_SERVER_SECRET = import.meta.env.VITE_ZEGO_SERVER_SECRET ?? '';
@@ -53,6 +53,7 @@ function VideoCompo() {
   const roomScreenRef = useRef(null);
   const meetingContainerRef = useRef(null);
   const suppressLeaveEventRef = useRef(false);
+  const nativeFullscreenRef = useRef(false);
   const queryRoomId = new URLSearchParams(location.search).get('roomID');
   const activeRoom = normalizeRoomId(roomId || queryRoomId);
   const roomUrl = `${window.location.origin}/video/${encodeURIComponent(activeRoom)}`;
@@ -64,7 +65,30 @@ VITE_ZEGO_SERVER_SECRET=your_server_secret`
     : `ZEGO_APP_ID=your_app_id
 ZEGO_SERVER_SECRET=your_server_secret`;
 
+  const getFullscreenElement = () =>
+    document.fullscreenElement || document.webkitFullscreenElement || null;
+
+  const exitNativeFullscreen = async () => {
+    if (!getFullscreenElement()) {
+      nativeFullscreenRef.current = false;
+      return;
+    }
+
+    try {
+      if (typeof document.exitFullscreen === 'function') {
+        await document.exitFullscreen();
+      } else if (typeof document.webkitExitFullscreen === 'function') {
+        await document.webkitExitFullscreen();
+      }
+    } catch {
+      // Ignore native fullscreen exit failures and fall back to CSS fullscreen only.
+    } finally {
+      nativeFullscreenRef.current = false;
+    }
+  };
+
   const showLeaveState = () => {
+    void exitNativeFullscreen();
     setIsFullscreen(false);
     setHasJoinedRoom(true);
     setHasLeftRoom(true);
@@ -152,6 +176,7 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         }
 
         if (canUseLocalDevToken) {
+          const ZegoUIKitPrebuilt = await loadZegoUIKitPrebuilt();
           const localKitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
             DEV_ZEGO_APP_ID,
             DEV_ZEGO_SERVER_SECRET,
@@ -199,59 +224,110 @@ ZEGO_SERVER_SECRET=your_server_secret`;
   }, [isFullscreen]);
 
   useEffect(() => {
+    const syncFullscreenState = () => {
+      const fullscreenElement = getFullscreenElement();
+      const isNativeFullscreen = fullscreenElement === roomScreenRef.current;
+
+      nativeFullscreenRef.current = isNativeFullscreen;
+      setIsFullscreen(isNativeFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFullscreenState);
+      document.removeEventListener('webkitfullscreenchange', syncFullscreenState);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!kitToken || !meetingContainerRef.current || hasLeftRoom || !hasJoinedRoom || !displayName) {
       return undefined;
     }
 
-    const container = meetingContainerRef.current;
-    let leftRoom = false;
-    suppressLeaveEventRef.current = false;
+    let cancelled = false;
+    let cleanupRoom = null;
 
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
+    const joinRoom = async () => {
+      try {
+        const ZegoUIKitPrebuilt = await loadZegoUIKitPrebuilt();
 
-    zp.joinRoom({
-      container,
-      sharedLinks: [
-        {
-          name: 'Room link',
-          url: roomUrl,
-        },
-      ],
-      showLeavingView: false,
-      showPreJoinView: false,
-      leaveRoomDialogConfig: {
-        confirmCallback: () => {
-          setIsFullscreen(false);
-        },
-      },
-      onLeaveRoom: () => {
-        if (suppressLeaveEventRef.current) {
+        if (cancelled || !meetingContainerRef.current) {
           return;
         }
 
-        leftRoom = true;
-        showLeaveState();
-      },
-      scenario: {
-        mode: ZegoUIKitPrebuilt.GroupCall,
-      },
-    });
+        const container = meetingContainerRef.current;
+        let leftRoom = false;
+        suppressLeaveEventRef.current = false;
+
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+        zp.joinRoom({
+          container,
+          layout: 'Grid',
+          sharedLinks: [
+            {
+              name: 'Room link',
+              url: roomUrl,
+            },
+          ],
+          showLeavingView: false,
+          showPreJoinView: false,
+          leaveRoomDialogConfig: {
+            confirmCallback: () => {
+              void exitNativeFullscreen();
+              setIsFullscreen(false);
+            },
+          },
+          onLeaveRoom: () => {
+            if (suppressLeaveEventRef.current) {
+              return;
+            }
+
+            leftRoom = true;
+            showLeaveState();
+          },
+          scenario: {
+            mode: ZegoUIKitPrebuilt.GroupCall,
+          },
+        });
+
+        cleanupRoom = () => {
+          if (leftRoom) {
+            return;
+          }
+
+          suppressLeaveEventRef.current = true;
+          try {
+            zp.destroy();
+          } catch {
+            // Ignore Zego teardown errors during React cleanup.
+          }
+
+          if (container === meetingContainerRef.current) {
+            container.innerHTML = '';
+          }
+        };
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setTokenError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load the ZEGO meeting SDK.',
+        );
+        setKitToken('');
+      }
+    };
+
+    joinRoom();
 
     return () => {
-      if (leftRoom) {
-        return;
-      }
-
-      suppressLeaveEventRef.current = true;
-      try {
-        zp.destroy();
-      } catch {
-        // Ignore Zego teardown errors during React cleanup.
-      }
-
-      if (container === meetingContainerRef.current) {
-        container.innerHTML = '';
-      }
+      cancelled = true;
+      cleanupRoom?.();
     };
   }, [displayName, hasJoinedRoom, hasLeftRoom, joinSession, kitToken, roomUrl]);
 
@@ -286,7 +362,40 @@ ZEGO_SERVER_SECRET=your_server_secret`;
   };
 
   const handleFullscreenToggle = async () => {
-    setIsFullscreen((current) => !current);
+    const nextState = !isFullscreen;
+
+    if (!nextState) {
+      await exitNativeFullscreen();
+      setIsFullscreen(false);
+      return;
+    }
+
+    const target = roomScreenRef.current;
+
+    if (!target) {
+      setIsFullscreen(true);
+      return;
+    }
+
+    try {
+      if (typeof target.requestFullscreen === 'function') {
+        await target.requestFullscreen();
+        nativeFullscreenRef.current = true;
+        setIsFullscreen(true);
+        return;
+      }
+
+      if (typeof target.webkitRequestFullscreen === 'function') {
+        await target.webkitRequestFullscreen();
+        nativeFullscreenRef.current = true;
+        setIsFullscreen(true);
+        return;
+      }
+    } catch {
+      nativeFullscreenRef.current = false;
+    }
+
+    setIsFullscreen(true);
   };
 
   return (

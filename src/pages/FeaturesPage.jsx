@@ -55,6 +55,48 @@ const workflow = [
   },
 ];
 
+const featureStories = [
+  {
+    image: '/feature-live-room.svg',
+    title: 'Launch rooms that feel ready before anyone joins',
+    label: 'Live room flow',
+    accent: 'accent-ice',
+    description:
+      'Talksy starts with the most important thing: getting people into the room fast. Create a room, share one clean code or link, and move straight into the live call experience without sending users through a heavy setup path.',
+    points: [
+      'Create or join directly from the homepage',
+      'Share one room link that works across devices',
+      'Use display names so people identify each other instantly',
+    ],
+  },
+  {
+    image: '/feature-history.svg',
+    title: 'Keep context after the call instead of starting from zero',
+    label: 'History and follow-up',
+    accent: 'accent-mint',
+    description:
+      'Every session does not have to disappear the moment it ends. Talksy keeps local room history so hosts can revisit room IDs, recent visits, participant context, and quick room details when planning the next conversation.',
+    points: [
+      'Recent room visits are stored locally',
+      'Reopen previous rooms faster from history',
+      'Use saved context to keep recurring calls organized',
+    ],
+  },
+  {
+    image: '/feature-mobile-share.svg',
+    title: 'Stay smooth on mobile, desktop, and installable app flows',
+    label: 'Cross-device experience',
+    accent: 'accent-lavender',
+    description:
+      'Talksy is built to feel clean on smaller screens too. Hosts can share links, join rooms, move into fullscreen, and return through install shortcuts without the interface feeling overloaded.',
+    points: [
+      'Responsive room and page layouts',
+      'Fullscreen live mode for focused viewing',
+      'Install Talksy like an app for faster relaunch',
+    ],
+  },
+];
+
 function FeaturesPage() {
   return (
     <section className="page-shell">
@@ -99,6 +141,29 @@ function FeaturesPage() {
             <li>Support assistant, demo room access, and install help</li>
           </ul>
         </article>
+      </div>
+
+      <div className="feature-story-list">
+        {featureStories.map((story, index) => (
+          <article
+            className={`feature-story ${story.accent}${index % 2 === 1 ? ' feature-story--reverse' : ''}`}
+            key={story.title}
+          >
+            <div className="feature-story__media">
+              <img alt={story.title} src={story.image} />
+            </div>
+            <div className="feature-story__content">
+              <span className="card-label">{story.label}</span>
+              <h3>{story.title}</h3>
+              <p>{story.description}</p>
+              <ul className="detail-list">
+                {story.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))}
       </div>
 
       <div className="timeline-grid">
