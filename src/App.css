@@ -489,17 +489,79 @@
   font-size: 1.03rem;
 }
 
+.hero-room-entry {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 34px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .hero-form {
+  display: grid;
+  gap: 18px;
+  max-width: 640px;
+  margin-top: 0;
+  padding: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--soft-shadow);
+}
+
+.hero-mode-toggle {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  justify-self: center;
+  padding: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 252, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.hero-form__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
-  max-width: 520px;
-  margin-top: 34px;
-  padding: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: var(--soft-shadow);
+  align-items: center;
+}
+
+.hero-mode-toggle__option {
+  min-height: 44px;
+  min-width: 112px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.hero-mode-toggle__option:hover,
+.hero-mode-toggle__option:focus-visible {
+  color: var(--text);
+}
+
+.hero-mode-toggle__option.is-active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue), var(--pink));
+  box-shadow: 0 14px 26px rgba(47, 99, 245, 0.18);
+}
+
+.hero-mode-toggle__option.is-active:hover,
+.hero-mode-toggle__option.is-active:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 30px rgba(47, 99, 245, 0.22);
 }
 
 .hero-input,
@@ -521,6 +583,13 @@
   --cta-glow-shadow: 0 18px 40px rgba(239, 79, 166, 0.28);
   box-shadow: 0 16px 32px rgba(239, 79, 166, 0.24);
   cursor: pointer;
+}
+
+.hero-button--create {
+  --button-fill: linear-gradient(135deg, var(--blue), #4a77ff);
+  --cta-aura: rgba(47, 99, 245, 0.28);
+  --cta-glow-shadow: 0 18px 40px rgba(47, 99, 245, 0.26);
+  box-shadow: 0 16px 32px rgba(47, 99, 245, 0.22);
 }
 
 .hero-actions {
@@ -3064,6 +3133,7 @@ button:focus-visible,
   }
 
   .hero-form,
+  .hero-form__row,
   .newsletter-form,
   .chat-composer,
   .hero-actions,
@@ -3194,6 +3264,20 @@ button:focus-visible,
   .hero-form {
     margin-left: auto;
     margin-right: auto;
+    padding: 12px;
+  }
+
+  .hero-room-entry {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-mode-toggle {
+    width: 100%;
+  }
+
+  .hero-mode-toggle__option {
+    min-width: 0;
   }
 
   .hero-visual {

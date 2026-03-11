@@ -204,14 +204,21 @@ function DraggableFloat({ className, children }) {
 }
 
 function Hero() {
+  const [roomMode, setRoomMode] = useState('join');
   const [roomId, setRoomId] = useState('');
   const navigate = useNavigate();
 
-  const handleJoinRoom = (event) => {
+  const handleRoomSubmit = (event) => {
     event.preventDefault();
 
-    const normalizedRoomId = roomId.trim().replace(/\s+/g, '-').toLowerCase() || 'instant-room';
-    navigate(`/video/${encodeURIComponent(normalizedRoomId)}`);
+    const normalizedRoomId = roomId.trim().replace(/\s+/g, '-').toLowerCase();
+    const fallbackRoomId = roomMode === 'create'
+      ? `room-${Date.now().toString(36)}`
+      : 'instant-room';
+
+    const nextRoomId = normalizedRoomId || fallbackRoomId;
+
+    navigate(`/video/${encodeURIComponent(nextRoomId)}`);
   };
 
   return (
@@ -225,19 +232,46 @@ function Hero() {
             No sign up required. Launch a room, share the code, and be talking in seconds.
           </p>
 
-          <form className="hero-form" onSubmit={handleJoinRoom}>
-            <input
-              aria-label="Room ID"
-              className="hero-input"
-              onChange={(event) => setRoomId(event.target.value)}
-              placeholder="Enter Room Id"
-              type="text"
-              value={roomId}
-            />
-            <button className="hero-button" type="submit">
-              Join Room
-            </button>
-          </form>
+          <div className="hero-room-entry">
+            <div aria-label="Room action" className="hero-mode-toggle" role="tablist">
+              <button
+                aria-selected={roomMode === 'join'}
+                className={`hero-mode-toggle__option${roomMode === 'join' ? ' is-active' : ''}`}
+                onClick={() => setRoomMode('join')}
+                role="tab"
+                type="button"
+              >
+                Join
+              </button>
+              <button
+                aria-selected={roomMode === 'create'}
+                className={`hero-mode-toggle__option${roomMode === 'create' ? ' is-active' : ''}`}
+                onClick={() => setRoomMode('create')}
+                role="tab"
+                type="button"
+              >
+                Create
+              </button>
+            </div>
+            <form className="hero-form" onSubmit={handleRoomSubmit}>
+              <div className="hero-form__row">
+                <input
+                  aria-label={roomMode === 'join' ? 'Room ID' : 'New room ID'}
+                  className="hero-input"
+                  onChange={(event) => setRoomId(event.target.value)}
+                  placeholder={roomMode === 'join' ? 'Enter Room Id' : 'Choose Room Id'}
+                  type="text"
+                  value={roomId}
+                />
+                <button
+                  className={`hero-button ${roomMode === 'create' ? 'hero-button--create' : 'hero-button--join'}`}
+                  type="submit"
+                >
+                  {roomMode === 'join' ? 'Join Room' : 'Create Room'}
+                </button>
+              </div>
+            </form>
+          </div>
 
           <div className="hero-actions">
             <Link className="hero-shortcut" to="/history">
