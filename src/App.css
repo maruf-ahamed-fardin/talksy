@@ -502,6 +502,7 @@
 .hero-form {
   display: grid;
   gap: 18px;
+  width: 100%;
   max-width: 640px;
   margin-top: 0;
   padding: 14px;
@@ -3264,16 +3265,20 @@ button:focus-visible,
   .hero-form {
     margin-left: auto;
     margin-right: auto;
+    width: 100%;
+    max-width: 100%;
     padding: 12px;
   }
 
   .hero-room-entry {
+    width: 100%;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
   }
 
   .hero-mode-toggle {
-    width: 100%;
+    width: min(100%, 248px);
   }
 
   .hero-mode-toggle__option {
@@ -3504,6 +3509,37 @@ button:focus-visible,
   .hero-copy p,
   .brand-copy p {
     max-width: 30ch;
+  }
+
+  .hero-room-entry {
+    gap: 10px;
+  }
+
+  .hero-form {
+    padding: 14px;
+  }
+
+  .hero-form__row {
+    gap: 10px;
+  }
+
+  .hero-mode-toggle {
+    width: min(100%, 228px);
+    padding: 4px;
+    border-radius: 16px;
+  }
+
+  .hero-mode-toggle__option {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    font-size: 0.96rem;
+  }
+
+  .hero-input {
+    min-height: 62px;
+    padding: 0 20px;
+    font-size: 1rem;
   }
 
   .section-gap {
