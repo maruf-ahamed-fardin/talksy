@@ -224,6 +224,27 @@ ZEGO_SERVER_SECRET=your_server_secret`;
   }, [isFullscreen]);
 
   useEffect(() => {
+    const syncViewportHeight = () => {
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty('--room-viewport-height', `${Math.round(viewportHeight)}px`);
+    };
+
+    syncViewportHeight();
+    window.addEventListener('resize', syncViewportHeight);
+    window.addEventListener('orientationchange', syncViewportHeight);
+    window.visualViewport?.addEventListener('resize', syncViewportHeight);
+    window.visualViewport?.addEventListener('scroll', syncViewportHeight);
+
+    return () => {
+      window.removeEventListener('resize', syncViewportHeight);
+      window.removeEventListener('orientationchange', syncViewportHeight);
+      window.visualViewport?.removeEventListener('resize', syncViewportHeight);
+      window.visualViewport?.removeEventListener('scroll', syncViewportHeight);
+      document.documentElement.style.removeProperty('--room-viewport-height');
+    };
+  }, []);
+
+  useEffect(() => {
     const syncFullscreenState = () => {
       const fullscreenElement = getFullscreenElement();
       const isNativeFullscreen = fullscreenElement === roomScreenRef.current;

@@ -2819,9 +2819,9 @@ body.room-fullscreen-active {
   inset: 0;
   z-index: 90;
   width: 100vw;
-  height: 100dvh;
-  min-height: 100dvh;
-  max-height: 100dvh;
+  height: var(--room-viewport-height, 100dvh);
+  min-height: var(--room-viewport-height, 100dvh);
+  max-height: var(--room-viewport-height, 100dvh);
   padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   border: 0;
   border-radius: 0;
@@ -2920,6 +2920,8 @@ body.room-fullscreen-active {
 }
 
 .zego-room-container {
+  display: flex;
+  align-items: stretch;
   width: 100%;
   flex: none;
   aspect-ratio: 16 / 9;
@@ -2931,8 +2933,15 @@ body.room-fullscreen-active {
 }
 
 .zego-room-container > * {
+  flex: 1 1 auto;
   width: 100% !important;
   height: 100% !important;
+}
+
+.zego-room-container > * > * {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
 }
 
 .room-left-state {
@@ -4213,7 +4222,7 @@ body.room-fullscreen-active {
   }
 
   .room-screen--live {
-    min-height: min(820px, calc(100dvh - 96px));
+    min-height: 0;
   }
 
   .room-screen--live.is-room-fullscreen {
@@ -4243,7 +4252,11 @@ body.room-fullscreen-active {
   }
 
   .zego-room-container,
-  .room-left-state,
+  .room-left-state {
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+  }
+
   .room-standby,
   .room-fallback {
     aspect-ratio: auto;
@@ -4255,7 +4268,25 @@ body.room-fullscreen-active {
   .room-screen--live.is-room-fullscreen .room-left-state,
   .room-screen--live.is-room-fullscreen .room-fallback,
   .room-screen--live.is-room-fullscreen .room-standby {
-    min-height: calc(100dvh - 112px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: 0;
+  }
+
+  .room-screen--live.is-room-fullscreen .room-stage {
+    flex: 1 1 auto;
+  }
+
+  .room-screen--live.is-room-fullscreen .zego-room-container,
+  .room-screen--live.is-room-fullscreen .room-left-state,
+  .room-screen--live.is-room-fullscreen .room-fallback,
+  .room-screen--live.is-room-fullscreen .room-standby {
+    height: 100%;
+  }
+
+  .room-screen--live.is-room-fullscreen .zego-room-container > *,
+  .room-screen--live.is-room-fullscreen .zego-room-container > * > * {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
   }
 
   .history-toolbar {
