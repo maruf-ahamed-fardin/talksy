@@ -599,6 +599,14 @@
   margin-right: auto;
 }
 
+.hero-room-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .hero-form {
   display: grid;
   gap: 18px;
@@ -610,6 +618,11 @@
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.78);
   box-shadow: var(--soft-shadow);
+}
+
+.hero-form__controls {
+  display: grid;
+  gap: 10px;
 }
 
 .hero-mode-toggle {
@@ -629,6 +642,70 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
+}
+
+.hero-form__row--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.hero-form__row--create {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.hero-form__row--create .hero-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hero-form__actions {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hero-form__action-stack {
+  width: min(100%, 220px);
+  display: grid;
+  align-content: end;
+  align-self: stretch;
+  flex: 0 0 220px;
+}
+
+.hero-form__actions .hero-button {
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.hero-form__select-wrap {
+  display: grid;
+  gap: 8px;
+}
+
+.hero-form__select-wrap--toolbar {
+  width: min(100%, 180px);
+  min-width: 0;
+  margin-left: auto;
+  text-align: center;
+}
+
+.hero-form__select-wrap--toolbar .hero-form__select-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.hero-form__select-label {
+  color: rgba(15, 23, 42, 0.72);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .hero-form__message {
@@ -679,6 +756,7 @@
 }
 
 .hero-input,
+.hero-select,
 .newsletter-form input {
   width: 100%;
   min-height: 56px;
@@ -688,6 +766,42 @@
   background: transparent;
   color: var(--text);
   outline: none;
+}
+
+.hero-select {
+  appearance: none;
+  padding-right: 48px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 252, 0.94)),
+    linear-gradient(135deg, rgba(47, 99, 245, 0.04), rgba(239, 79, 166, 0.04));
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.1),
+    0 10px 22px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 252, 0.94)),
+    linear-gradient(135deg, rgba(47, 99, 245, 0.04), rgba(239, 79, 166, 0.04)),
+    linear-gradient(45deg, transparent 50%, rgba(15, 23, 42, 0.58) 50%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.58) 50%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: auto, auto, 9px 9px, 9px 9px;
+  background-position: 0 0, 0 0, calc(100% - 22px) 24px, calc(100% - 16px) 24px;
+}
+
+.hero-select:focus {
+  box-shadow:
+    inset 0 0 0 1px rgba(47, 99, 245, 0.26),
+    0 0 0 4px rgba(47, 99, 245, 0.12);
+}
+
+.hero-select--centered {
+  min-height: 48px;
+  padding: 0 34px 0 16px;
+  border-radius: 12px;
+  text-align: center;
+  text-align-last: center;
+  background-size: auto, auto, 7px 7px, 7px 7px;
+  background-position: 0 0, 0 0, calc(100% - 17px) 21px, calc(100% - 12px) 21px;
 }
 
 .hero-input::placeholder,
@@ -701,6 +815,172 @@
 .hero-input.is-invalid {
   background: rgba(254, 242, 242, 0.82);
   box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.22);
+}
+
+.hero-input--password {
+  letter-spacing: 0.18em;
+}
+
+.hero-form__icon-button {
+  width: 56px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 56px;
+}
+
+.hero-form__icon-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.hero-form__icon-spin {
+  transform-origin: center;
+  animation: hero-generate-spin 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-password-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(47, 99, 245, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(47, 99, 245, 0.1), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 255, 0.94));
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+}
+
+.hero-password-card.is-invalid {
+  border-color: rgba(180, 35, 24, 0.2);
+  box-shadow: 0 18px 34px rgba(180, 35, 24, 0.08);
+}
+
+.hero-password-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hero-password-card__label {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.hero-password-card__hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(47, 99, 245, 0.08);
+  color: #173eaf;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-password-field {
+  position: relative;
+}
+
+.hero-password-field__input {
+  min-height: 60px;
+  padding-right: 70px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(47, 99, 245, 0.12);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-password-field__input:focus {
+  box-shadow:
+    inset 0 0 0 1px rgba(47, 99, 245, 0.28),
+    0 0 0 4px rgba(47, 99, 245, 0.1);
+}
+
+.hero-password-field__input.is-invalid {
+  background: rgba(254, 242, 242, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.22);
+}
+
+.hero-password-field__toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: rgba(47, 99, 245, 0.08);
+  color: #173eaf;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.hero-password-field__toggle:hover,
+.hero-password-field__toggle:focus-visible {
+  background: rgba(47, 99, 245, 0.14);
+  box-shadow: 0 10px 20px rgba(47, 99, 245, 0.14);
+}
+
+.hero-password-field__toggle:focus-visible {
+  outline: none;
+}
+
+.hero-password-field__toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hero-password-card__meter {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hero-password-card__dot {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.hero-password-card__dot.is-filled {
+  background: linear-gradient(90deg, var(--blue), var(--pink));
+  box-shadow: 0 8px 18px rgba(47, 99, 245, 0.16);
+}
+
+@keyframes hero-generate-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  45% {
+    transform: rotate(170deg) scale(0.84);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
 
 .hero-button {
@@ -857,10 +1137,6 @@
 
 .hero-float[data-drag-scope='full'].is-dragging .hero-float__item {
   cursor: grabbing;
-}
-
-.hero-float.is-returning {
-  transition: transform 18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hero-float.is-dragging .hero-float__item {
@@ -2787,6 +3063,7 @@
   flex-direction: column;
   gap: 16px;
   min-height: 0;
+  --room-live-stage-aspect-ratio: 16 / 9;
 }
 
 .room-screen__header {
@@ -2924,7 +3201,7 @@ body.room-fullscreen-active {
   align-items: stretch;
   width: 100%;
   flex: none;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--room-live-stage-aspect-ratio);
   min-height: 0;
   overflow: hidden;
   border-radius: 22px;
@@ -2948,7 +3225,7 @@ body.room-fullscreen-active {
   display: grid;
   width: 100%;
   flex: none;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--room-live-stage-aspect-ratio);
   place-items: center;
   align-content: center;
   gap: 28px;
@@ -3047,6 +3324,18 @@ body.room-fullscreen-active {
 .room-name-input:focus {
   border-color: rgba(47, 99, 245, 0.38);
   box-shadow: 0 0 0 4px rgba(47, 99, 245, 0.12);
+}
+
+.room-name-input.is-invalid {
+  background: rgba(254, 242, 242, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.22);
+}
+
+.room-name-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .room-fallback {
@@ -3912,6 +4201,40 @@ body.room-fullscreen-active {
     flex-direction: column;
   }
 
+  .hero-form__controls {
+    align-items: stretch;
+  }
+
+  .hero-room-toolbar {
+    width: 100%;
+    align-items: flex-end;
+  }
+
+  .hero-form__row--create {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    align-items: end;
+    justify-content: stretch;
+    gap: 12px;
+  }
+
+  .hero-form__action-stack {
+    width: 220px;
+    flex: 0 0 220px;
+  }
+
+  .hero-form__actions {
+    width: 100%;
+  }
+
+  .hero-form__select-wrap--toolbar {
+    width: min(100%, 172px);
+  }
+
+  .hero-password-card {
+    padding: 15px 16px 16px;
+  }
+
   .hero-actions {
     width: 100%;
     display: grid;
@@ -4048,6 +4371,10 @@ body.room-fullscreen-active {
 
   .hero-mode-toggle {
     width: min(100%, 248px);
+  }
+
+  .hero-form__icon-button {
+    width: 56px;
   }
 
   .hero-mode-toggle__option {
@@ -4253,7 +4580,7 @@ body.room-fullscreen-active {
 
   .zego-room-container,
   .room-left-state {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: var(--room-live-stage-aspect-ratio);
     min-height: 0;
   }
 
@@ -4356,6 +4683,10 @@ body.room-fullscreen-active {
     width: min(1120px, calc(100% - 20px));
   }
 
+  .room-screen--live {
+    --room-live-stage-aspect-ratio: 9 / 16;
+  }
+
   .hero-copy p,
   .brand-copy p {
     max-width: 30ch;
@@ -4365,12 +4696,32 @@ body.room-fullscreen-active {
     gap: 10px;
   }
 
+  .hero-room-toolbar {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
   .hero-form {
     padding: 14px;
   }
 
   .hero-form__row {
     gap: 10px;
+  }
+
+  .hero-form__row--create {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .hero-form__action-stack {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .hero-form__select-wrap--toolbar {
+    width: min(100%, 180px);
+    margin-left: 0;
   }
 
   .hero-mode-toggle {
@@ -4729,21 +5080,73 @@ body.room-fullscreen-active {
   background: var(--surface-muted);
 }
 
-:root[data-theme='dark'] .hero-mode-toggle__option {
-  --button-fill: linear-gradient(180deg, rgba(17, 30, 52, 0.94), rgba(10, 18, 32, 0.9));
-  --button-border-base: rgba(148, 163, 184, 0.14);
-  color: #d7e3f8;
+:root[data-theme='dark'] .hero-form__select-label {
+  color: rgba(226, 232, 240, 0.74);
 }
 
-:root[data-theme='dark'] .hero-mode-toggle__option:hover,
-:root[data-theme='dark'] .hero-mode-toggle__option:focus-visible {
-  color: #f8fbff;
+:root[data-theme='dark'] .hero-select {
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(17, 30, 52, 0.94), rgba(10, 18, 32, 0.9)),
+    linear-gradient(135deg, rgba(90, 124, 255, 0.08), rgba(255, 107, 181, 0.05)),
+    linear-gradient(45deg, transparent 50%, rgba(215, 227, 248, 0.76) 50%),
+    linear-gradient(135deg, rgba(215, 227, 248, 0.76) 50%, transparent 50%);
+  box-shadow:
+    inset 0 0 0 1px rgba(148, 163, 184, 0.16),
+    0 12px 24px rgba(2, 6, 23, 0.2);
 }
 
-:root[data-theme='dark'] .hero-mode-toggle__option.is-active {
-  --button-fill: linear-gradient(135deg, var(--blue), #4d79ff, var(--pink));
-  --button-border-base: rgba(255, 255, 255, 0.24);
-  color: #fff;
+:root[data-theme='dark'] .hero-password-card {
+  border-color: rgba(148, 163, 184, 0.16);
+  background:
+    radial-gradient(circle at top right, rgba(90, 124, 255, 0.14), transparent 40%),
+    linear-gradient(180deg, rgba(16, 28, 48, 0.96), rgba(10, 18, 32, 0.94));
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.28);
+}
+
+:root[data-theme='dark'] .hero-password-card.is-invalid {
+  border-color: rgba(255, 144, 144, 0.22);
+  box-shadow: 0 20px 40px rgba(88, 18, 33, 0.22);
+}
+
+:root[data-theme='dark'] .hero-password-card__hint {
+  background: rgba(90, 124, 255, 0.18);
+  color: #dbe7ff;
+}
+
+:root[data-theme='dark'] .hero-password-field__input {
+  background: rgba(11, 20, 36, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+:root[data-theme='dark'] .hero-password-field__input:focus {
+  box-shadow:
+    inset 0 0 0 1px rgba(90, 124, 255, 0.32),
+    0 0 0 4px rgba(90, 124, 255, 0.14);
+}
+
+:root[data-theme='dark'] .hero-password-field__input.is-invalid {
+  background: rgba(84, 24, 36, 0.46);
+  box-shadow: inset 0 0 0 1px rgba(255, 144, 144, 0.24);
+}
+
+:root[data-theme='dark'] .hero-password-field__toggle {
+  background: rgba(90, 124, 255, 0.16);
+  color: #dbe7ff;
+}
+
+:root[data-theme='dark'] .hero-password-field__toggle:hover,
+:root[data-theme='dark'] .hero-password-field__toggle:focus-visible {
+  background: rgba(90, 124, 255, 0.24);
+  box-shadow: 0 10px 20px rgba(90, 124, 255, 0.18);
+}
+
+:root[data-theme='dark'] .hero-password-card__dot {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+:root[data-theme='dark'] .room-name-error {
+  color: #ffb4ab;
 }
 
 :root[data-theme='dark'] .hero-avatar-card {

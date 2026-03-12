@@ -1,6 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { addCallHistoryEntry } from '../data/callHistory';
+import {
+  buildRoomPath,
+  getRoom,
+  hasRoomAccess,
+  isValidPrivateRoomPassword,
+  rememberRoomAccess,
+  verifyPrivateRoomPassword,
+} from '../data/roomRegistry';
 import { loadZegoUIKitPrebuilt } from '../lib/loadZegoUIKit';
 
 const DEV_ZEGO_APP_ID = Number.parseInt(import.meta.env.VITE_ZEGO_APP_ID ?? '', 10);
@@ -12,6 +20,49 @@ const checklist = [
   'Room link copied and shared',
   'Join from another browser tab to test the full flow',
 ];
+
+function ensureInlineVideoPlayback(rootElement) {
+  rootElement?.querySelectorAll('video').forEach((videoElement) => {
+    videoElement.setAttribute('playsinline', '');
+    videoElement.setAttribute('webkit-playsinline', 'true');
+    videoElement.setAttribute('autoplay', '');
+    videoElement.playsInline = true;
+    videoElement.autoplay = true;
+  });
+}
+
+async function copyTextToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+
+  if (typeof document === 'undefined') {
+    return false;
+  }
+
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.setAttribute('readonly', '');
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  textArea.style.pointerEvents = 'none';
+  textArea.style.inset = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  textArea.setSelectionRange(0, textArea.value.length);
+
+  try {
+    return typeof document.execCommand === 'function' && document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textArea);
+  }
+}
+
+function getFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
 
 function randomID(length = 5) {
   const chars = '12345qwertyuiopasdfgh67890jklmnbvcxzMNBVCZXASDQWERTYHGFUIOLKJP';
@@ -39,9 +90,12 @@ function getStoredDisplayName() {
 function VideoCompo() {
   const { roomId } = useParams();
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const [userID] = useState(() => `user-${randomID(8)}`);
   const [displayName, setDisplayName] = useState('');
   const [nameDraft, setNameDraft] = useState(() => getStoredDisplayName());
+  const [passwordDraft, setPasswordDraft] = useState('');
+  const [roomPasswordError, setRoomPasswordError] = useState('');
   const [copyStatus, setCopyStatus] = useState('Copy invite link');
   const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
   const [hasLeftRoom, setHasLeftRoom] = useState(false);
@@ -54,21 +108,31 @@ function VideoCompo() {
   const meetingContainerRef = useRef(null);
   const suppressLeaveEventRef = useRef(false);
   const nativeFullscreenRef = useRef(false);
-  const queryRoomId = new URLSearchParams(location.search).get('roomID');
+  const queryRoomId = searchParams.get('roomID');
   const activeRoom = normalizeRoomId(roomId || queryRoomId);
-  const roomUrl = `${window.location.origin}/video/${encodeURIComponent(activeRoom)}`;
+  const storedRoom = getRoom(activeRoom);
+  const sharedRoomType = searchParams.get('roomType');
+  const sharedRoomLock = `${searchParams.get('lock') ?? ''}`.trim();
+  const roomVisibility = storedRoom?.visibility ?? (sharedRoomType === 'private' && sharedRoomLock ? 'private' : 'public');
+  const roomPasswordHash = storedRoom?.passwordHash || (roomVisibility === 'private' ? sharedRoomLock : '');
+  const isPrivateRoom = roomVisibility === 'private' && Boolean(roomPasswordHash);
+  const [isPrivateRoomUnlocked, setIsPrivateRoomUnlocked] = useState(() =>
+    !roomPasswordHash || hasRoomAccess(activeRoom, roomPasswordHash),
+  );
+  const roomUrl = `${window.location.origin}${buildRoomPath(activeRoom, {
+    visibility: roomVisibility,
+    passwordHash: roomPasswordHash,
+  })}`;
   const canUseLocalDevToken = import.meta.env.DEV && DEV_ZEGO_APP_ID > 0 && DEV_ZEGO_SERVER_SECRET.length > 0;
-  const shouldShowNamePrompt = !hasJoinedRoom && !hasLeftRoom;
+  const shouldShowPrivateRoomPrompt = isPrivateRoom && !isPrivateRoomUnlocked;
+  const shouldShowNamePrompt = !shouldShowPrivateRoomPrompt && !hasJoinedRoom && !hasLeftRoom;
   const roomFallbackSnippet = import.meta.env.DEV
     ? `VITE_ZEGO_APP_ID=your_app_id
 VITE_ZEGO_SERVER_SECRET=your_server_secret`
     : `ZEGO_APP_ID=your_app_id
 ZEGO_SERVER_SECRET=your_server_secret`;
 
-  const getFullscreenElement = () =>
-    document.fullscreenElement || document.webkitFullscreenElement || null;
-
-  const exitNativeFullscreen = async () => {
+  const exitNativeFullscreen = useCallback(async () => {
     if (!getFullscreenElement()) {
       nativeFullscreenRef.current = false;
       return;
@@ -85,25 +149,28 @@ ZEGO_SERVER_SECRET=your_server_secret`;
     } finally {
       nativeFullscreenRef.current = false;
     }
-  };
+  }, []);
 
-  const showLeaveState = () => {
+  const showLeaveState = useCallback(() => {
     void exitNativeFullscreen();
     setIsFullscreen(false);
     setHasJoinedRoom(true);
     setHasLeftRoom(true);
-  };
+  }, [exitNativeFullscreen]);
 
   useEffect(() => {
     setHasJoinedRoom(false);
     setHasLeftRoom(false);
     setDisplayName('');
+    setPasswordDraft('');
+    setRoomPasswordError('');
+    setIsPrivateRoomUnlocked(!roomPasswordHash || hasRoomAccess(activeRoom, roomPasswordHash));
     setCopyStatus('Copy invite link');
     setJoinSession(0);
     setKitToken('');
     setTokenError('');
     setIsPreparingRoom(false);
-  }, [activeRoom]);
+  }, [activeRoom, roomPasswordHash]);
 
   useEffect(() => {
     if (!hasJoinedRoom || hasLeftRoom || !displayName || !kitToken) {
@@ -269,6 +336,7 @@ ZEGO_SERVER_SECRET=your_server_secret`;
 
     let cancelled = false;
     let cleanupRoom = null;
+    let videoObserver = null;
 
     const joinRoom = async () => {
       try {
@@ -281,6 +349,17 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         const container = meetingContainerRef.current;
         let leftRoom = false;
         suppressLeaveEventRef.current = false;
+        ensureInlineVideoPlayback(container);
+
+        if (typeof MutationObserver !== 'undefined') {
+          videoObserver = new MutationObserver(() => {
+            ensureInlineVideoPlayback(container);
+          });
+          videoObserver.observe(container, {
+            childList: true,
+            subtree: true,
+          });
+        }
 
         const zp = ZegoUIKitPrebuilt.create(kitToken);
 
@@ -315,6 +394,9 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         });
 
         cleanupRoom = () => {
+          videoObserver?.disconnect();
+          videoObserver = null;
+
           if (leftRoom) {
             return;
           }
@@ -331,6 +413,9 @@ ZEGO_SERVER_SECRET=your_server_secret`;
           }
         };
       } catch (error) {
+        videoObserver?.disconnect();
+        videoObserver = null;
+
         if (cancelled) {
           return;
         }
@@ -350,12 +435,12 @@ ZEGO_SERVER_SECRET=your_server_secret`;
       cancelled = true;
       cleanupRoom?.();
     };
-  }, [displayName, hasJoinedRoom, hasLeftRoom, joinSession, kitToken, roomUrl]);
+  }, [displayName, exitNativeFullscreen, hasJoinedRoom, hasLeftRoom, joinSession, kitToken, roomUrl, showLeaveState]);
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(roomUrl);
-      setCopyStatus('Invite link copied');
+      const copied = await copyTextToClipboard(roomUrl);
+      setCopyStatus(copied ? 'Invite link copied' : 'Copy failed');
     } catch {
       setCopyStatus('Copy failed');
     }
@@ -365,6 +450,24 @@ ZEGO_SERVER_SECRET=your_server_secret`;
     setHasJoinedRoom(true);
     setHasLeftRoom(false);
     setJoinSession((current) => current + 1);
+  };
+
+  const handlePrivateRoomSubmit = (event) => {
+    event.preventDefault();
+
+    if (!isValidPrivateRoomPassword(passwordDraft)) {
+      setRoomPasswordError('Enter the 4-digit password for this room.');
+      return;
+    }
+
+    if (!verifyPrivateRoomPassword(activeRoom, passwordDraft, roomPasswordHash)) {
+      setRoomPasswordError('That password is not correct for this private room.');
+      return;
+    }
+
+    rememberRoomAccess(activeRoom, roomPasswordHash);
+    setRoomPasswordError('');
+    setIsPrivateRoomUnlocked(true);
   };
 
   const handleNameSubmit = (event) => {
@@ -484,6 +587,12 @@ ZEGO_SERVER_SECRET=your_server_secret`;
                 {roomFallbackSnippet}
               </pre>
             </div>
+          ) : shouldShowPrivateRoomPrompt ? (
+            <div className="room-standby">
+              <span className="card-label">Private room</span>
+              <h2>{activeRoom}</h2>
+              <p>Enter the 4-digit room password in the popup to unlock this call.</p>
+            </div>
           ) : (
             <div className="room-standby">
               <span className="card-label">Ready to join</span>
@@ -512,6 +621,8 @@ ZEGO_SERVER_SECRET=your_server_secret`;
             <span className="card-label">Session details</span>
             <ul className="detail-list">
               <li>Room ID: {activeRoom}</li>
+              <li>Room type: {roomVisibility === 'private' ? 'Private' : 'Public'}</li>
+              <li>Access: {roomVisibility === 'private' ? '4-digit password required' : 'Open invite link'}</li>
               <li>Display name: {displayName || 'Not set yet'}</li>
               <li>Mode: Group call</li>
             </ul>
@@ -541,7 +652,45 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         </aside>
       </div>
 
-      {shouldShowNamePrompt ? (
+      {shouldShowPrivateRoomPrompt ? (
+        <div className="room-name-backdrop">
+          <div
+            aria-labelledby="room-password-title"
+            aria-modal="true"
+            className="room-name-dialog"
+            role="dialog"
+          >
+            <span className="card-label">Private room</span>
+            <h2 id="room-password-title">Enter room password</h2>
+            <p>
+              Room <strong>{activeRoom}</strong> is private. Enter the 4-digit password before joining.
+            </p>
+            <form className="room-name-form" onSubmit={handlePrivateRoomSubmit}>
+              <input
+                autoFocus
+                className={`room-name-input${roomPasswordError ? ' is-invalid' : ''}`}
+                inputMode="numeric"
+                maxLength="4"
+                onChange={(event) => {
+                  setPasswordDraft(event.target.value.replace(/\D/g, '').slice(0, 4));
+                  setRoomPasswordError('');
+                }}
+                placeholder="4-digit password"
+                type="password"
+                value={passwordDraft}
+              />
+              <button className="hero-button hero-button--create" disabled={passwordDraft.length !== 4} type="submit">
+                Unlock room
+              </button>
+            </form>
+            {roomPasswordError ? (
+              <p className="room-name-error" role="alert">
+                {roomPasswordError}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : shouldShowNamePrompt ? (
         <div className="room-name-backdrop">
           <div
             aria-labelledby="room-name-title"
