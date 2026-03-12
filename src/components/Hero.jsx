@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   buildRoomPath,
@@ -239,11 +239,23 @@ function parseRoomDestination(value) {
 function Hero() {
   const [roomMode, setRoomMode] = useState('join');
   const [roomVisibility, setRoomVisibility] = useState('public');
+  const [isRoomVisibilityMenuOpen, setIsRoomVisibilityMenuOpen] = useState(false);
   const [roomId, setRoomId] = useState('');
   const [privatePassword, setPrivatePassword] = useState('');
   const [isPrivatePasswordVisible, setIsPrivatePasswordVisible] = useState(false);
   const [roomError, setRoomError] = useState('');
   const [generateSpinCycle, setGenerateSpinCycle] = useState(0);
+  const [roomModeGliderStyle, setRoomModeGliderStyle] = useState({
+    opacity: '0',
+    transform: 'translate3d(0px, 0, 0)',
+    width: '0px',
+  });
+  const roomModeToggleRef = useRef(null);
+  const roomModeButtonRefs = useRef({
+    join: null,
+    create: null,
+  });
+  const roomVisibilityMenuRef = useRef(null);
   const navigate = useNavigate();
   const hasPrivatePasswordError =
     roomMode === 'create' &&
@@ -260,6 +272,7 @@ function Hero() {
   const handleRoomModeChange = (nextMode) => {
     setRoomMode(nextMode);
     setRoomError('');
+    setIsRoomVisibilityMenuOpen(false);
 
     if (nextMode !== 'create') {
       setRoomVisibility('public');
@@ -267,6 +280,31 @@ function Hero() {
       setIsPrivatePasswordVisible(false);
     }
   };
+
+  const syncRoomModeGlider = useCallback(() => {
+    const container = roomModeToggleRef.current;
+    const activeButton = roomModeButtonRefs.current[roomMode];
+
+    if (!container || !activeButton) {
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const activeButtonRect = activeButton.getBoundingClientRect();
+    const nextStyle = {
+      opacity: '1',
+      transform: `translate3d(${activeButtonRect.left - containerRect.left}px, 0, 0)`,
+      width: `${activeButtonRect.width}px`,
+    };
+
+    setRoomModeGliderStyle((current) => (
+      current.opacity === nextStyle.opacity &&
+      current.transform === nextStyle.transform &&
+      current.width === nextStyle.width
+        ? current
+        : nextStyle
+    ));
+  }, [roomMode]);
 
   const handleRoomIdChange = (event) => {
     setRoomId(event.target.value);
@@ -276,12 +314,57 @@ function Hero() {
   const handleRoomVisibilityChange = (nextVisibility) => {
     setRoomVisibility(nextVisibility);
     setRoomError('');
+    setIsRoomVisibilityMenuOpen(false);
 
     if (nextVisibility === 'public') {
       setPrivatePassword('');
       setIsPrivatePasswordVisible(false);
     }
   };
+
+  useLayoutEffect(() => {
+    syncRoomModeGlider();
+  }, [syncRoomModeGlider]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      syncRoomModeGlider();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [syncRoomModeGlider]);
+
+  useEffect(() => {
+    if (!isRoomVisibilityMenuOpen) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      const menu = roomVisibilityMenuRef.current;
+
+      if (menu && event.target instanceof Node && !menu.contains(event.target)) {
+        setIsRoomVisibilityMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsRoomVisibilityMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isRoomVisibilityMenuOpen]);
 
   const handlePrivatePasswordChange = (event) => {
     setPrivatePassword(event.target.value.replace(/\D/g, '').slice(0, 4));
@@ -363,11 +446,20 @@ function Hero() {
 
           <div className="hero-room-entry">
             <div className="hero-room-toolbar">
-              <div aria-label="Room action" className="hero-mode-toggle" role="tablist">
+              <div
+                aria-label="Room action"
+                className="hero-mode-toggle"
+                role="tablist"
+                ref={roomModeToggleRef}
+              >
+                <span aria-hidden="true" className="hero-mode-toggle__glider" style={roomModeGliderStyle} />
                 <button
                   aria-selected={roomMode === 'join'}
                   className={`hero-mode-toggle__option${roomMode === 'join' ? ' is-active' : ''}`}
                   onClick={() => handleRoomModeChange('join')}
+                  ref={(node) => {
+                    roomModeButtonRefs.current.join = node;
+                  }}
                   role="tab"
                   type="button"
                 >
@@ -377,6 +469,9 @@ function Hero() {
                   aria-selected={roomMode === 'create'}
                   className={`hero-mode-toggle__option${roomMode === 'create' ? ' is-active' : ''}`}
                   onClick={() => handleRoomModeChange('create')}
+                  ref={(node) => {
+                    roomModeButtonRefs.current.create = node;
+                  }}
                   role="tab"
                   type="button"
                 >
@@ -386,15 +481,40 @@ function Hero() {
               {roomMode === 'create' ? (
                 <label className="hero-form__select-wrap hero-form__select-wrap--toolbar">
                   <span className="hero-form__select-label">Room type</span>
-                  <select
-                    aria-label="Room type"
-                    className="hero-select hero-select--centered"
-                    onChange={(event) => handleRoomVisibilityChange(event.target.value)}
-                    value={roomVisibility}
-                  >
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
-                  </select>
+                  <div className="hero-select-menu" ref={roomVisibilityMenuRef}>
+                    <button
+                      aria-controls="hero-room-visibility-options"
+                      aria-expanded={isRoomVisibilityMenuOpen}
+                      aria-haspopup="listbox"
+                      className={`hero-select hero-select--centered hero-select-trigger${isRoomVisibilityMenuOpen ? ' is-open' : ''}`}
+                      onClick={() => setIsRoomVisibilityMenuOpen((current) => !current)}
+                      type="button"
+                    >
+                      <span>{roomVisibility === 'private' ? 'Private' : 'Public'}</span>
+                    </button>
+                    <div className={`hero-select-popover${isRoomVisibilityMenuOpen ? ' is-open' : ''}`}>
+                      <div className="hero-select-popover__panel" id="hero-room-visibility-options" role="listbox">
+                        <button
+                          aria-selected={roomVisibility === 'public'}
+                          className={`hero-select-popover__option${roomVisibility === 'public' ? ' is-selected' : ''}`}
+                          onClick={() => handleRoomVisibilityChange('public')}
+                          role="option"
+                          type="button"
+                        >
+                          Public
+                        </button>
+                        <button
+                          aria-selected={roomVisibility === 'private'}
+                          className={`hero-select-popover__option${roomVisibility === 'private' ? ' is-selected' : ''}`}
+                          onClick={() => handleRoomVisibilityChange('private')}
+                          role="option"
+                          type="button"
+                        >
+                          Private
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </label>
               ) : null}
             </div>
@@ -557,14 +677,6 @@ function Hero() {
                           </svg>
                         )}
                       </button>
-                    </div>
-                    <div aria-hidden="true" className="hero-password-card__meter">
-                      {[0, 1, 2, 3].map((index) => (
-                        <span
-                          className={`hero-password-card__dot${privatePassword.length > index ? ' is-filled' : ''}`}
-                          key={index}
-                        />
-                      ))}
                     </div>
                   </div>
                 </div>
