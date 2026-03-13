@@ -21,14 +21,38 @@ const checklist = [
   'Join from another browser tab to test the full flow',
 ];
 
-function ensureInlineVideoPlayback(rootElement) {
-  rootElement?.querySelectorAll('video').forEach((videoElement) => {
-    videoElement.setAttribute('playsinline', '');
-    videoElement.setAttribute('webkit-playsinline', 'true');
-    videoElement.setAttribute('autoplay', '');
-    videoElement.playsInline = true;
-    videoElement.autoplay = true;
-  });
+function configureRoomMediaElement(mediaElement) {
+  if (!(mediaElement instanceof HTMLMediaElement)) {
+    return;
+  }
+
+  mediaElement.setAttribute('autoplay', '');
+  mediaElement.autoplay = true;
+
+  if (mediaElement instanceof HTMLVideoElement) {
+    mediaElement.setAttribute('playsinline', '');
+    mediaElement.setAttribute('webkit-playsinline', 'true');
+    mediaElement.playsInline = true;
+  }
+}
+
+async function attemptRoomMediaPlayback(mediaElement) {
+  if (!(mediaElement instanceof HTMLMediaElement)) {
+    return false;
+  }
+
+  configureRoomMediaElement(mediaElement);
+
+  if (!mediaElement.paused) {
+    return true;
+  }
+
+  try {
+    await mediaElement.play();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function copyTextToClipboard(text) {
@@ -347,13 +371,51 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         }
 
         const container = meetingContainerRef.current;
+        const mediaPlaybackCleanup = [];
+        const initializedMediaElements = new WeakSet();
         let leftRoom = false;
         suppressLeaveEventRef.current = false;
-        ensureInlineVideoPlayback(container);
+
+        const syncRoomMediaPlayback = () => {
+          container.querySelectorAll('video, audio').forEach((mediaElement) => {
+            configureRoomMediaElement(mediaElement);
+
+            if (!initializedMediaElements.has(mediaElement)) {
+              initializedMediaElements.add(mediaElement);
+
+              const retryPlayback = () => {
+                void attemptRoomMediaPlayback(mediaElement);
+              };
+
+              mediaElement.addEventListener('loadedmetadata', retryPlayback);
+              mediaElement.addEventListener('canplay', retryPlayback);
+              mediaPlaybackCleanup.push(() => {
+                mediaElement.removeEventListener('loadedmetadata', retryPlayback);
+                mediaElement.removeEventListener('canplay', retryPlayback);
+              });
+            }
+
+            void attemptRoomMediaPlayback(mediaElement);
+          });
+        };
+
+        const unlockRoomMediaPlayback = () => {
+          syncRoomMediaPlayback();
+        };
+
+        window.addEventListener('pointerdown', unlockRoomMediaPlayback, { passive: true });
+        window.addEventListener('touchstart', unlockRoomMediaPlayback, { passive: true });
+        window.addEventListener('keydown', unlockRoomMediaPlayback);
+        mediaPlaybackCleanup.push(() => {
+          window.removeEventListener('pointerdown', unlockRoomMediaPlayback);
+          window.removeEventListener('touchstart', unlockRoomMediaPlayback);
+          window.removeEventListener('keydown', unlockRoomMediaPlayback);
+        });
+        syncRoomMediaPlayback();
 
         if (typeof MutationObserver !== 'undefined') {
           videoObserver = new MutationObserver(() => {
-            ensureInlineVideoPlayback(container);
+            syncRoomMediaPlayback();
           });
           videoObserver.observe(container, {
             childList: true,
@@ -396,6 +458,7 @@ ZEGO_SERVER_SECRET=your_server_secret`;
         cleanupRoom = () => {
           videoObserver?.disconnect();
           videoObserver = null;
+          mediaPlaybackCleanup.splice(0).forEach((cleanup) => cleanup());
 
           if (leftRoom) {
             return;
